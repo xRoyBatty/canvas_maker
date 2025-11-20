@@ -1,12 +1,12 @@
 # 🚀 Quick Start - Quiz Generator
 
-## Dla niecierpliwych (2 minuty)
+## Dla niecierpliwych (2 minuty - bez backendu)
 
 1. **Otwórz `quiz_generator_ALL_IN_ONE.html` w Gemini Canvas**
 
 2. **Kliknij "Generate All Assets"** (poczekaj 2-3 min)
 
-3. **Kliknij "Pobierz Assety"** → dostaniesz `interactive_quiz_READY.html`
+3. **Kliknij "Pobierz Quiz"** → dostaniesz `interactive_quiz_READY.html`
 
 4. **Wgraj na VPS:**
    ```bash
@@ -20,6 +20,37 @@
    ```
 
 6. **Gotowe!** Otwórz `http://twój-vps-ip:8080/quiz.html`
+
+## Z backendem PHP (persistent leaderboard) - 5 minut
+
+1-3. **Jak wyżej** (wygeneruj quiz)
+
+4. **Kliknij "Pobierz Backend (PHP)"** → dostaniesz 3 pliki:
+   - `leaderboard.php`
+   - `.htaccess`
+   - `BACKEND_README.md`
+
+5. **Zainstaluj backend:**
+   ```bash
+   scp leaderboard.php .htaccess BACKEND_README.md user@vps:~
+   ssh user@vps
+   sudo mkdir -p /var/www/html/api
+   sudo mv leaderboard.php .htaccess /var/www/html/api/
+   sudo chown -R www-data:www-data /var/www/html/api
+   ```
+
+6. **Edytuj quiz** (`interactive_quiz_READY.html`):
+   ```javascript
+   const USE_BACKEND = true; // Zmień na true
+   const LEADERBOARD_API = 'http://twój-vps/api/leaderboard.php'; // Twój URL
+   ```
+
+7. **Wgraj quiz:**
+   ```bash
+   scp interactive_quiz_READY.html user@vps:/var/www/html/quiz.html
+   ```
+
+8. **Gotowe!** Leaderboard zapisuje wyniki na stałe 🏆
 
 ---
 

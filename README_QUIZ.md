@@ -5,10 +5,13 @@
 **ULTRA-PROSTY WORKFLOW:**
 1. Otwórz **quiz_generator_ALL_IN_ONE.html** w Gemini Canvas
 2. Kliknij "Generate All Assets"
-3. Pobierz gotowy quiz
-4. Wgraj na VPS
+3. Pobierz gotowy quiz (HTML + wszystkie obrazki)
+4. **OPCJONALNIE:** Pobierz backend (PHP API dla leaderboard)
+5. Wgraj na VPS
 
 **To wszystko!** Zero kopiowania, wklejania czy edytowania plików!
+
+**NOWE:** Backend PHP dla persistent leaderboard - bez bazy danych, tylko JSON!
 
 ---
 
