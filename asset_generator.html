@@ -113,6 +113,33 @@ const callWithRetry = async (apiCall, maxRetries = 5, initialDelay = 2000) => {
     }
 };
 
+// Compress PNG to JPG using Canvas API (reduces size by ~70%)
+const compressToJPG = async (pngBase64, quality = 0.7) => {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            // Create canvas with same dimensions
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+
+            // Draw image
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+
+            // Export as JPG with quality setting
+            const jpgDataUrl = canvas.toDataURL('image/jpeg', quality);
+
+            // Extract base64 (remove "data:image/jpeg;base64," prefix)
+            const jpgBase64 = jpgDataUrl.split(',')[1];
+
+            resolve(jpgBase64);
+        };
+        img.onerror = () => reject(new Error('Failed to load image for compression'));
+        img.src = `data:image/png;base64,${pngBase64}`;
+    });
+};
+
 function createAssetCard(asset) {
     const div = document.createElement('div');
     div.className = 'asset-card bg-slate-800/50 backdrop-blur rounded-xl p-4 border border-slate-700';
@@ -152,14 +179,20 @@ async function generateAll() {
 
             progressText.textContent = `Generating ${asset.filename}...`;
 
-            const base64 = await generateImage(asset.prompt);
+            // Generate PNG from Imagen API
+            const pngBase64 = await generateImage(asset.prompt);
+
+            // Compress to JPG 70% quality (reduces size by ~70%)
+            statusEl.textContent = 'Compressing...';
+            const jpgBase64 = await compressToJPG(pngBase64, 0.7);
+
             generatedAssets[asset.id] = {
-                base64: base64,
+                base64: jpgBase64,
                 filename: asset.filename
             };
 
             const previewEl = document.getElementById(`preview-${asset.id}`);
-            previewEl.innerHTML = `<img src="data:image/png;base64,${base64}" class="w-full h-full object-cover rounded-lg">`;
+            previewEl.innerHTML = `<img src="data:image/jpeg;base64,${jpgBase64}" class="w-full h-full object-cover rounded-lg">`;
 
             statusEl.textContent = '✓ Generated';
             statusEl.className = 'text-sm text-green-400';
@@ -189,14 +222,20 @@ async function generateSingle(assetId) {
     statusEl.className = 'text-sm text-blue-400';
 
     try {
-        const base64 = await generateImage(asset.prompt);
+        // Generate PNG from Imagen API
+        const pngBase64 = await generateImage(asset.prompt);
+
+        // Compress to JPG 70% quality (reduces size by ~70%)
+        statusEl.textContent = 'Compressing...';
+        const jpgBase64 = await compressToJPG(pngBase64, 0.7);
+
         generatedAssets[assetId] = {
-            base64: base64,
+            base64: jpgBase64,
             filename: asset.filename
         };
 
         const previewEl = document.getElementById(`preview-${assetId}`);
-        previewEl.innerHTML = `<img src="data:image/png;base64,${base64}" class="w-full h-full object-cover rounded-lg">`;
+        previewEl.innerHTML = `<img src="data:image/jpeg;base64,${jpgBase64}" class="w-full h-full object-cover rounded-lg">`;
 
         statusEl.textContent = '✓ Generated';
         statusEl.className = 'text-sm text-green-400';
@@ -212,7 +251,7 @@ function downloadAllAssets() {
     let assetsCode = 'const QUIZ_ASSETS = {\n';
 
     for (const [id, data] of Object.entries(generatedAssets)) {
-        assetsCode += `    '${id}': 'data:image/png;base64,${data.base64}',\n`;
+        assetsCode += `    '${id}': 'data:image/jpeg;base64,${data.base64}',\n`;
     }
 
     assetsCode += '};';
