@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Asset Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .asset-card {
+            transition: all 0.3s;
+        }
+        .asset-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+        }
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-screen text-white p-8">
+
+<div class="max-w-7xl mx-auto">
+    <header class="mb-8">
+        <h1 class="text-4xl font-bold mb-2">Quiz Asset Generator</h1>
+        <p class="text-gray-300">Generate all images needed for the food quiz</p>
+    </header>
+
+    <div class="bg-slate-800/50 backdrop-blur rounded-xl p-6 mb-6">
+        <div class="flex gap-4 mb-4">
+            <button id="generate-all-btn" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition">
+                🎨 Generate All Assets
+            </button>
+            <button id="download-all-btn" class="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition" disabled>
+                ⬇️ Pobierz Assety (Kopiuj + Plik)
+            </button>
+        </div>
+        <div id="progress" class="hidden">
+            <div class="bg-slate-700 rounded-full h-3 overflow-hidden">
+                <div id="progress-bar" class="bg-blue-500 h-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <p id="progress-text" class="text-sm text-gray-400 mt-2">Ready to generate...</p>
+        </div>
+    </div>
+
+    <div id="assets-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+</div>
+
+<script type="module">
+const ASSETS_TO_GENERATE = [
+    { id: 'fish', prompt: 'Fresh raw fish on white plate, clean product photography, white background, 8k quality', filename: 'fish.png' },
+    { id: 'strawberry', prompt: 'Fresh red strawberry with green leaves, clean product photography, white background, 8k quality', filename: 'strawberry.png' },
+    { id: 'jam', prompt: 'Glass jar of strawberry jam with red contents, clean product photography, white background, 8k quality', filename: 'jam.png' },
+    { id: 'fruits_vegetables', prompt: 'Fresh colorful fruits and vegetables display at market, tomatoes, lettuce, carrots, apples, oranges, clean photography, 8k quality', filename: 'fruits_vegetables.png' },
+    { id: 'chicken', prompt: 'Grilled chicken breast on white plate, clean food photography, white background, 8k quality', filename: 'chicken.png' },
+    { id: 'chips', prompt: 'Golden french fries on white plate, clean food photography, white background, 8k quality', filename: 'chips.png' },
+    { id: 'rice', prompt: 'Bowl of white cooked rice with chopsticks, Chinese style, clean food photography, white background, 8k quality', filename: 'rice.png' },
+    { id: 'sausages', prompt: 'Grilled sausages on white plate, clean food photography, white background, 8k quality', filename: 'sausages.png' },
+    { id: 'cheese', prompt: 'Piece of yellow cheese with holes on white plate, clean product photography, white background, 8k quality', filename: 'cheese.png' },
+    { id: 'strawberries_cream', prompt: 'Fresh strawberries with whipped cream in bowl, clean food photography, white background, 8k quality', filename: 'strawberries_cream.png' },
+    { id: 'coffee_sugar', prompt: 'Cup of black coffee with sugar cubes on side, clean food photography, white background, 8k quality', filename: 'coffee_sugar.png' },
+    { id: 'breakfast_club', prompt: 'School cafeteria breakfast scene with students eating cereal, toast, fruit, happy atmosphere, bright lighting, 8k quality', filename: 'breakfast_club.png' }
+];
+
+let generatedAssets = {};
+
+const generateImage = async (prompt) => {
+    return callWithRetry(async () => {
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                instances: [{ prompt: prompt }],
+                parameters: { sampleCount: 1, aspectRatio: "1:1" }
+            })
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+
+        if (result.predictions?.[0]?.bytesBase64Encoded) {
+            return result.predictions[0].bytesBase64Encoded;
+        }
+        throw new Error("Invalid image data");
+    });
+};
+
+const callWithRetry = async (apiCall, maxRetries = 5, initialDelay = 2000) => {
+    let delay = initialDelay;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            return await apiCall();
+        } catch (error) {
+            if (attempt === maxRetries) throw error;
+            await new Promise(resolve => setTimeout(resolve, delay));
+            delay *= 2;
+        }
+    }
+};
+
+function createAssetCard(asset) {
+    const div = document.createElement('div');
+    div.className = 'asset-card bg-slate-800/50 backdrop-blur rounded-xl p-4 border border-slate-700';
+    div.id = `card-${asset.id}`;
+    div.innerHTML = `
+        <div class="aspect-square bg-slate-900 rounded-lg mb-3 flex items-center justify-center" id="preview-${asset.id}">
+            <span class="text-gray-500">Not generated</span>
+        </div>
+        <h3 class="font-semibold mb-2">${asset.filename}</h3>
+        <div id="status-${asset.id}" class="text-sm text-gray-400">Waiting...</div>
+        <button onclick="generateSingle('${asset.id}')" class="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm w-full">
+            Generate This
+        </button>
+    `;
+    return div;
+}
+
+async function generateAll() {
+    const btn = document.getElementById('generate-all-btn');
+    const downloadBtn = document.getElementById('download-all-btn');
+    const progress = document.getElementById('progress');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+
+    btn.disabled = true;
+    btn.textContent = '🎨 Generating...';
+    progress.classList.remove('hidden');
+
+    let completed = 0;
+    const total = ASSETS_TO_GENERATE.length;
+
+    for (const asset of ASSETS_TO_GENERATE) {
+        try {
+            const statusEl = document.getElementById(`status-${asset.id}`);
+            statusEl.textContent = 'Generating...';
+            statusEl.className = 'text-sm text-blue-400';
+
+            progressText.textContent = `Generating ${asset.filename}...`;
+
+            const base64 = await generateImage(asset.prompt);
+            generatedAssets[asset.id] = {
+                base64: base64,
+                filename: asset.filename
+            };
+
+            const previewEl = document.getElementById(`preview-${asset.id}`);
+            previewEl.innerHTML = `<img src="data:image/png;base64,${base64}" class="w-full h-full object-cover rounded-lg">`;
+
+            statusEl.textContent = '✓ Generated';
+            statusEl.className = 'text-sm text-green-400';
+
+            completed++;
+            const percentage = (completed / total) * 100;
+            progressBar.style.width = `${percentage}%`;
+
+        } catch (error) {
+            const statusEl = document.getElementById(`status-${asset.id}`);
+            statusEl.textContent = `✗ Error: ${error.message}`;
+            statusEl.className = 'text-sm text-red-400';
+        }
+    }
+
+    progressText.textContent = 'All assets generated!';
+    btn.textContent = '✓ All Generated';
+    downloadBtn.disabled = false;
+}
+
+async function generateSingle(assetId) {
+    const asset = ASSETS_TO_GENERATE.find(a => a.id === assetId);
+    if (!asset) return;
+
+    const statusEl = document.getElementById(`status-${assetId}`);
+    statusEl.textContent = 'Generating...';
+    statusEl.className = 'text-sm text-blue-400';
+
+    try {
+        const base64 = await generateImage(asset.prompt);
+        generatedAssets[assetId] = {
+            base64: base64,
+            filename: asset.filename
+        };
+
+        const previewEl = document.getElementById(`preview-${assetId}`);
+        previewEl.innerHTML = `<img src="data:image/png;base64,${base64}" class="w-full h-full object-cover rounded-lg">`;
+
+        statusEl.textContent = '✓ Generated';
+        statusEl.className = 'text-sm text-green-400';
+
+    } catch (error) {
+        statusEl.textContent = `✗ Error: ${error.message}`;
+        statusEl.className = 'text-sm text-red-400';
+    }
+}
+
+function downloadAllAssets() {
+    // Build the QUIZ_ASSETS object
+    let assetsCode = 'const QUIZ_ASSETS = {\n';
+
+    for (const [id, data] of Object.entries(generatedAssets)) {
+        assetsCode += `    '${id}': 'data:image/png;base64,${data.base64}',\n`;
+    }
+
+    assetsCode += '};';
+
+    // Inject assets into quiz template
+    const quizHTML = QUIZ_TEMPLATE.replace('/*INJECT_ASSETS_HERE*/', assetsCode);
+
+    // Download complete quiz
+    const blob = new Blob([quizHTML], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'interactive_quiz_READY.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    // Show instructions
+    const instructions = `
+✅ GOTOWY QUIZ POBRANY!
+
+Plik: interactive_quiz_READY.html
+
+WSZYSTKIE ASSETY SĄ JUŻ WBUDOWANE!
+
+Teraz wystarczy wgrać na VPS:
+
+   scp interactive_quiz_READY.html user@twój-vps:~/quiz.html
+   ssh user@twój-vps
+   python3 -m http.server 8080
+
+Quiz dostępny na: http://twój-vps-ip:8080/quiz.html
+
+Gotowe! 🎉
+    `;
+
+    alert(instructions);
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    const grid = document.getElementById('assets-grid');
+    ASSETS_TO_GENERATE.forEach(asset => {
+        grid.appendChild(createAssetCard(asset));
+    });
+
+    document.getElementById('generate-all-btn').addEventListener('click', generateAll);
+    document.getElementById('download-all-btn').addEventListener('click', downloadAllAssets);
+});
+
+
+// Quiz template with injection marker
+const QUIZ_TEMPLATE = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food & Grammar Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+
+        .question-card {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .theory-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .alarm-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, #dc2626, #991b1b);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .drag-item {
+            cursor: move;
+            transition: all 0.2s;
+        }
+
+        .drag-item:hover {
+            transform: scale(1.05);
+        }
+
+        .drag-item.dragging {
+            opacity: 0.5;
+        }
+
+        .drop-zone {
+            min-height: 50px;
+            border: 2px dashed #6b7280;
+            transition: all 0.3s;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .drop-zone.filled {
+            border-style: solid;
+            border-color: #10b981;
+        }
+
+        .correct {
+            background: rgba(16, 185, 129, 0.2) !important;
+            border-color: #10b981 !important;
+        }
+
+        .incorrect {
+            background: rgba(239, 68, 68, 0.2) !important;
+            border-color: #ef4444 !important;
+        }
+
+        .leaderboard {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .timer-display {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .sortable-item {
+            cursor: move;
+            transition: all 0.2s;
+        }
+
+        .sortable-item:hover {
+            transform: translateX(5px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-screen text-white">
+
+<!-- Leaderboard -->
+<div class="leaderboard bg-slate-800/90 backdrop-blur rounded-xl p-4 border border-slate-700">
+    <h3 class="text-lg font-bold mb-3">🏆 Leaderboard</h3>
+    <div id="leaderboard-list" class="space-y-2"></div>
+</div>
+
+<!-- Theory Modal -->
+<div id="theory-modal" class="theory-modal hidden">
+    <div class="bg-slate-800 rounded-xl p-8 max-w-2xl mx-4 border-2 border-blue-500">
+        <h2 class="text-2xl font-bold mb-4" id="theory-title">Theory</h2>
+        <div id="theory-content" class="text-gray-300 mb-6 space-y-4"></div>
+        <div id="copy-instruction" class="hidden bg-yellow-900/50 border border-yellow-500 rounded-lg p-4 mb-4">
+            <p class="font-semibold text-yellow-300">⚠️ PRZEPISZ TEORIĘ DO ZESZYTU ABY KONTYNUOWAĆ</p>
+            <p class="text-sm text-yellow-200 mt-2">Sprawdzę czy to zrobiłeś po czasie (minimum 1 minuta).</p>
+        </div>
+        <div class="flex gap-4 items-center">
+            <button id="theory-understand-btn" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition">
+                Zrozumiałem
+            </button>
+            <span id="theory-timer" class="text-gray-400 timer-display"></span>
+        </div>
+    </div>
+</div>
+
+<!-- Alarm Screen -->
+<div id="alarm-screen" class="alarm-screen hidden">
+    <div class="text-center">
+        <div class="text-8xl mb-6">⚠️</div>
+        <h1 class="text-5xl font-bold mb-4">ALARM!</h1>
+        <p class="text-2xl mb-6">Nie przepisałeś teorii do zeszytu!</p>
+        <p class="text-xl mb-8">Musisz poczekać <span id="alarm-countdown" class="font-bold text-yellow-300">15</span> sekund</p>
+        <p class="text-gray-300">Następnym razem poświęć czas na naukę!</p>
+    </div>
+</div>
+
+<!-- Main Container -->
+<div class="max-w-4xl mx-auto p-6 pb-32">
+    <!-- Header -->
+    <header class="mb-8">
+        <div class="bg-slate-800/50 backdrop-blur rounded-xl p-6 border border-slate-700">
+            <h1 class="text-4xl font-bold mb-2">🍎 Food & Grammar Quiz</h1>
+            <div class="flex justify-between items-center mt-4">
+                <div>
+                    <p class="text-gray-300">Student: <input type="text" id="student-name" class="bg-slate-900 border border-slate-600 rounded px-3 py-1 ml-2" placeholder="Twoje imię"></p>
+                </div>
+                <div class="text-right">
+                    <div class="text-3xl font-bold text-blue-400 timer-display" id="quiz-timer">00:00</div>
+                    <p class="text-sm text-gray-400">Czas quizu</p>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="flex justify-between text-sm text-gray-400 mb-2">
+                    <span>Postęp</span>
+                    <span id="progress-text">0/33</span>
+                </div>
+                <div class="bg-slate-700 rounded-full h-3 overflow-hidden">
+                    <div id="progress-bar" class="bg-blue-500 h-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Question Container -->
+    <div id="question-container"></div>
+
+    <!-- Navigation -->
+    <div class="fixed bottom-0 left-0 right-0 bg-slate-800/90 backdrop-blur border-t border-slate-700 p-4">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <button id="prev-btn" class="px-6 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                ← Poprzednie
+            </button>
+            <div id="score-display" class="text-xl font-bold">
+                Punkty: <span id="score-value" class="text-green-400">0</span>
+            </div>
+            <button id="next-btn" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition">
+                Następne →
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================
+// QUIZ DATA & CONFIGURATION
+// ============================================
+
+// Placeholder for assets - replace with generated assets from Canvas app
+/*INJECT_ASSETS_HERE*/
+
+const GRAMMAR_THEORIES = {
+    'containers': {
+        title: 'Teoria: Pojemniki i opakowania (Containers)',
+        content: \`
+            <h3 class="font-bold text-lg mb-2">Najważniejsze pojemniki w języku angielskim:</h3>
+            <ul class="list-disc list-inside space-y-2 mb-4">
+                <li><strong>a jar</strong> - słoik (np. for jam, honey, pickles)</li>
+                <li><strong>a bottle</strong> - butelka (np. for water, wine, juice)</li>
+                <li><strong>a can</strong> - puszka (np. for cola, soup, vegetables)</li>
+                <li><strong>a carton</strong> - karton (np. for milk, juice, eggs)</li>
+                <li><strong>a bar</strong> - tabliczka/batonik (np. for chocolate, soap)</li>
+            </ul>
+            <div class="bg-blue-900/30 p-3 rounded">
+                <p class="font-semibold">Przykłady użycia:</p>
+                <p>✓ There is a <u>jar</u> of jam in the cupboard.</p>
+                <p>✓ I need a <u>bottle</u> of water.</p>
+                <p>✓ Can you buy a <u>can</u> of cola?</p>
+            </div>
+        \`
+    },
+    'articles': {
+        title: 'Teoria: Przedimki a / an / - (Articles)',
+        content: \`
+            <h3 class="font-bold text-lg mb-2">Kiedy używamy przedimków?</h3>
+            <ul class="list-disc list-inside space-y-2 mb-4">
+                <li><strong>A</strong> - przed rzeczownikami policzalnymi w liczbie pojedynczej, które zaczynają się od SPÓŁGŁOSKI<br/>
+                    <span class="text-blue-300">Przykład: a lemon, a bar, a chocolate</span>
+                </li>
+                <li><strong>AN</strong> - przed rzeczownikami policzalnymi w liczbie pojedynczej, które zaczynają się od SAMOGŁOSKI (a, e, i, o, u)<br/>
+                    <span class="text-blue-300">Przykład: an egg, an apple, an orange</span>
+                </li>
+                <li><strong>- (brak przedimka)</strong> - przed rzeczownikami NIEPOLICZALNYMI lub w liczbie MNOGIEJ<br/>
+                    <span class="text-blue-300">Przykład: milk, flour, sugar, eggs (l. mnoga)</span>
+                </li>
+            </ul>
+            <div class="bg-blue-900/30 p-3 rounded">
+                <p class="font-semibold">Zapamiętaj:</p>
+                <p>Rzeczowniki policzalne: egg, lemon, bar, chocolate bar</p>
+                <p>Rzeczowniki niepoliczalne: milk, flour, sugar, chocolate (bez opakowania)</p>
+            </div>
+        \`
+    },
+    'quantifiers': {
+        title: 'Teoria: Określenia ilości (Quantifiers: much, many, some, any, a lot)',
+        content: \`
+            <h3 class="font-bold text-lg mb-2">Jak mówić o ilości?</h3>
+            <div class="space-y-3 mb-4">
+                <div class="bg-green-900/30 p-3 rounded">
+                    <p class="font-semibold">RZECZOWNIKI POLICZALNE (countable):</p>
+                    <p>✓ <strong>many</strong> - dużo (w pytaniach i przeczeniach)<br/>
+                    <span class="text-sm text-gray-300">How many biscuits are there?</span></p>
+                    <p>✓ <strong>some</strong> - trochę (w zdaniach twierdzących)<br/>
+                    <span class="text-sm text-gray-300">There are some biscuits.</span></p>
+                    <p>✓ <strong>any</strong> - jakieś/żadne (w pytaniach i przeczeniach)<br/>
+                    <span class="text-sm text-gray-300">Are there any biscuits?</span></p>
+                </div>
+
+                <div class="bg-blue-900/30 p-3 rounded">
+                    <p class="font-semibold">RZECZOWNIKI NIEPOLICZALNE (uncountable):</p>
+                    <p>✓ <strong>much</strong> - dużo (w pytaniach i przeczeniach)<br/>
+                    <span class="text-sm text-gray-300">How much bread is there?</span></p>
+                    <p>✓ <strong>some</strong> - trochę (w zdaniach twierdzących)<br/>
+                    <span class="text-sm text-gray-300">There is some bread.</span></p>
+                    <p>✓ <strong>any</strong> - trochę/wcale (w pytaniach i przeczeniach)<br/>
+                    <span class="text-sm text-gray-300">Is there any bread?</span></p>
+                </div>
+
+                <div class="bg-purple-900/30 p-3 rounded">
+                    <p class="font-semibold">DLA OBU TYPÓW:</p>
+                    <p>✓ <strong>a lot (of)</strong> - dużo (w zdaniach twierdzących)<br/>
+                    <span class="text-sm text-gray-300">There is a lot of bread. / There are a lot of biscuits.</span></p>
+                </div>
+            </div>
+        \`
+    }
+};
+
+const QUESTIONS = [
+    // Q1-8: Fill in the blank with images
+    {
+        id: 1,
+        type: 'fill-blank',
+        time: 60,
+        points: 1,
+        image: 'fish',
+        question: 'Look at the picture and complete the word:',
+        text: 'f_sh',
+        answer: 'fish',
+        alternatives: []
+    },
+    {
+        id: 2,
+        type: 'fill-blank',
+        time: 60,
+        points: 1,
+        image: 'strawberry',
+        question: 'Look at the picture and complete the word:',
+        text: 'str_wberry',
+        answer: 'strawberry',
+        alternatives: []
+    },
+    {
+        id: 3,
+        type: 'fill-blank',
+        time: 60,
+        points: 1,
+        image: 'jam',
+        question: 'Look at the picture and complete the word:',
+        text: 'j_m',
+        answer: 'jam',
+        alternatives: []
+    },
+    {
+        id: 4,
+        type: 'fill-blank',
+        time: 60,
+        points: 1,
+        image: 'fruits_vegetables',
+        question: 'The (0)________ and vegetables look yummy.',
+        answer: 'fruit',
+        alternatives: ['fruits']
+    },
+    {
+        id: 5,
+        type: 'fill-blank',
+        time: 60,
+        points: 1,
+        image: 'chicken',
+        question: 'And I want some (1) c_____________ too.',
+        answer: 'chicken',
+        alternatives: []
+    },
+    {
+        id: 6,
+        type: 'fill-blank',
+        time: 60,
+        points: 1,
+        image: 'rice',
+        question: 'I like chicken, but I want to try the Chinese (2) r_____________.',
+        answer: 'rice',
+        alternatives: []
+    },
+    {
+        id: 7,
+        type: 'fill-blank',
+        time: 60,
+        points: 1,
+        image: 'sausages',
+        question: 'Can I have the (3) s_____________?',
+        answer: 'sausages',
+        alternatives: []
+    },
+    {
+        id: 8,
+        type: 'fill-blank',
+        time: 60,
+        points: 1,
+        image: 'cheese',
+        question: 'Max: Are you still hungry? Sonia: Yes, I am! Can I have some 4 c_____________ and biscuits now?',
+        answer: 'cheese',
+        alternatives: []
+    },
+    {
+        id: 9,
+        type: 'fill-blank',
+        time: 60,
+        points: 1,
+        image: 'strawberries_cream',
+        question: 'I want some 5 s_____________ and cream.',
+        answer: 'strawberries',
+        alternatives: []
+    },
+    {
+        id: 10,
+        type: 'fill-blank',
+        time: 60,
+        points: 1,
+        image: 'coffee_sugar',
+        question: 'And I want some coffee with 6 s_____________.',
+        answer: 'sugar',
+        alternatives: []
+    },
+
+    // Q9-13: Multiple choice (categorization)
+    {
+        id: 11,
+        type: 'multiple-choice',
+        time: 30,
+        points: 1,
+        question: 'Zakreśl słowa, które NIE pasują do podanej kategorii.<br/>Vegetables: tomatoes / potatoes / toast',
+        options: ['tomatoes', 'potatoes', 'toast'],
+        answer: 'toast'
+    },
+    {
+        id: 12,
+        type: 'multiple-choice',
+        time: 30,
+        points: 1,
+        question: 'Zakreśl słowa, które NIE pasują do podanej kategorii.<br/>Food from animals: pasta / ham / meat',
+        options: ['pasta', 'ham', 'meat'],
+        answer: 'pasta'
+    },
+    {
+        id: 13,
+        type: 'multiple-choice',
+        time: 30,
+        points: 1,
+        question: 'Zakreśl słowa, które NIE pasują do podanej kategorii.<br/>Fruit: apples / oranges / pancakes',
+        options: ['apples', 'oranges', 'pancakes'],
+        answer: 'pancakes'
+    },
+    {
+        id: 14,
+        type: 'multiple-choice',
+        time: 30,
+        points: 1,
+        question: 'Zakreśl słowa, które NIE pasują do podanej kategorii.<br/>Food from the sea: fish / tuna / yoghurt',
+        options: ['fish', 'tuna', 'yoghurt'],
+        answer: 'yoghurt'
+    },
+    {
+        id: 15,
+        type: 'multiple-choice',
+        time: 30,
+        points: 1,
+        question: 'Zakreśl słowa, które NIE pasują do podanej kategorii.<br/>Food from plants: cereal / milk / bread',
+        options: ['cereal', 'milk', 'bread'],
+        answer: 'milk'
+    },
+
+    // Q14: Drag and drop - THEORY REQUIRED
+    {
+        id: 16,
+        type: 'drag-drop',
+        time: 90,
+        points: 1,
+        theory: 'containers',
+        question: 'Uzupełnij zdania podanymi słowami: bar, can, jar, bottle, carton',
+        items: [
+            { text: 'There is a _____ of cola in the fridge.', answer: 'can' },
+            { text: "There's a _____ of water in the kitchen.", answer: 'bottle' },
+            { text: 'We need to buy a _____ of jam in the supermarket.', answer: 'jar' },
+            { text: "I'd like that _____ of chocolate, please.", answer: 'bar' },
+            { text: "There isn't any juice in the _____.", answer: 'carton' }
+        ],
+        words: ['bar', 'can', 'jar', 'bottle', 'carton']
+    },
+
+    // Q15-21: Multiple choice (articles) - THEORY REQUIRED
+    {
+        id: 17,
+        type: 'multiple-choice',
+        time: 30,
+        points: 1,
+        theory: 'articles',
+        question: 'You need _____ milk',
+        options: ['a', '-'],
+        answer: '-'
+    },
+    {
+        id: 18,
+        type: 'multiple-choice',
+        time: 30,
+        points: 1,
+        theory: 'articles',
+        question: '_____ egg',
+        options: ['a', 'an'],
+        answer: 'an'
+    },
+    {
+        id: 19,
+        type: 'multiple-choice',
+        time: 30,
+        points: 1,
+        theory: 'articles',
+        question: '_____ flour',
+        options: ['a', '-'],
+        answer: '-'
+    },
+    {
+        id: 20,
+        type: 'multiple-choice',
+        time: 30,
+        points: 1,
+        theory: 'articles',
+        question: '_____ chocolate (as material)',
+        options: ['a', '-'],
+        answer: '-'
+    },
+    {
+        id: 21,
+        type: 'multiple-choice',
+        time: 30,
+        points: 1,
+        theory: 'articles',
+        question: '_____ bar of chocolate',
+        options: ['a', '-'],
+        answer: 'a'
+    },
+    {
+        id: 22,
+        type: 'multiple-choice',
+        time: 30,
+        points: 1,
+        theory: 'articles',
+        question: '_____ sugar',
+        options: ['an', '-'],
+        answer: '-'
+    },
+    {
+        id: 23,
+        type: 'multiple-choice',
+        time: 30,
+        points: 1,
+        theory: 'articles',
+        question: 'You need _____ lemon for the topping too.',
+        options: ['a', '-'],
+        answer: 'a'
+    },
+
+    // Q22-23: Drag and drop (quantifiers) - THEORY REQUIRED
+    {
+        id: 24,
+        type: 'drag-drop',
+        time: 90,
+        points: 1,
+        theory: 'quantifiers',
+        question: 'Uzupełnij dialog podanymi słowami: a lot, any, many, much, some',
+        items: [
+            { text: "Lilian: I'm hungry! Nigel: There's _____ bread in the kitchen.", answer: 'some' },
+            { text: 'Lilian: How _____ bread is there?', answer: 'much' },
+            { text: "Nigel: There's _____ of bread.", answer: 'a lot' },
+            { text: 'Lilian: Good! We can make _____ sandwiches.', answer: 'some' }
+        ],
+        words: ['a lot', 'any', 'many', 'much', 'some']
+    },
+    {
+        id: 25,
+        type: 'drag-drop',
+        time: 90,
+        points: 1,
+        theory: 'quantifiers',
+        question: 'Uzupełnij dialog c.d.:',
+        items: [
+            { text: 'Nigel: Is there _____ butter?', answer: 'any' },
+            { text: "Lilian: No, there isn't, so we can't make _____ sandwiches.", answer: 'any' },
+            { text: 'Nigel: How _____ biscuits are there?', answer: 'many' }
+        ],
+        words: ['any', 'many', 'some', 'much']
+    },
+
+    // Q24: Reorder
+    {
+        id: 26,
+        type: 'reorder',
+        time: 90,
+        points: 1,
+        question: 'Ułóż w odpowiedniej kolejności następujące zdania, żeby utworzyć dialog. Pierwsze zdanie jest już na miejscu:<br/><strong>0. Are you ready to order? What would you like?</strong>',
+        items: [
+            { id: 1, text: 'Anything else?', order: 4 },
+            { id: 2, text: 'And would you like anything to drink?', order: 2 },
+            { id: 3, text: 'No, thank you.', order: 5 },
+            { id: 4, text: "Yes, please. I'd like a glass of juice, please.", order: 3 },
+            { id: 5, text: 'Can I have a pizza, please?', order: 1 }
+        ]
+    },
+
+    // Q25-33: Reading comprehension
+    {
+        id: 27,
+        type: 'reading',
+        time: 600,
+        points: 9,
+        image: 'breakfast_club',
+        passage: \`<h3 class="font-bold text-xl mb-4">School breakfast clubs</h3>
+        <p>Mornings are usually difficult for school children. Children often haven't got time to eat breakfast. They arrive at school hungry and have problems during lessons. In some schools there are breakfast clubs. Students can have a quick breakfast there. They can have cereal with milk or yoghurt, sandwiches and toast with jam or ham, and some fruit (usually apples or bananas). They drink tea or mineral water. After breakfast in the club, the children usually have some time to play and have a chat with their friends before they start their lessons. Breakfast at school helps children start a day with a smile. They are also never late for classes – they are already at school.</p>\`,
+        questions: [
+            { text: 'Some students don't have _________ before school.', answer: 'breakfast' },
+            { text: 'Some students are ______________ when they come to school.', answer: 'hungry' },
+            { text: 'In some schools there are ______________ clubs.', answer: 'breakfast' },
+            { text: 'Students can often have some fruit, like bananas or ______________.', answer: 'apples' },
+            { text: 'After breakfast, students can ______________ with their friends.', answer: 'chat', alternatives: ['play'] },
+            { text: 'Children who eat breakfast at school are ______________ late for lessons.', answer: 'never' },
+            { text: 'Children drink some tea or _________', answer: 'water', alternatives: ['mineral water'] },
+            { text: 'Hungry children have ____________ during lessons.', answer: 'problems' },
+            { text: 'Mornings are NOT _________ for school children', answer: 'easy', alternatives: ['simple'] }
+        ]
+    }
+];
+
+// ============================================
+// STATE MANAGEMENT
+// ============================================
+let currentQuestionIndex = 0;
+let score = 0;
+let studentName = '';
+let quizStartTime = Date.now();
+let questionStartTime = Date.now();
+let timerInterval;
+let theoryStartTime = null;
+let currentTheoryType = null;
+let hasSeenTheory = {};
+let wrongAfterTheory = {};
+
+// Leaderboard (simulated - in real deployment, use backend)
+let leaderboard = [
+    { name: 'Anna K.', score: 28, time: '15:23' },
+    { name: 'Piotr M.', score: 26, time: '18:45' },
+    { name: 'Maria W.', score: 25, time: '14:12' }
+];
+
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return \`\${String(mins).padStart(2, '0')}:\${String(secs).padStart(2, '0')}\`;
+}
+
+function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function normalizeAnswer(answer) {
+    return answer.toLowerCase().trim().replace(/\\s+/g, ' ');
+}
+
+function checkAnswer(userAnswer, correctAnswer, alternatives = []) {
+    const normalized = normalizeAnswer(userAnswer);
+    if (normalized === normalizeAnswer(correctAnswer)) return true;
+
+    for (const alt of alternatives) {
+        if (normalized === normalizeAnswer(alt)) return true;
+    }
+
+    return false;
+}
+
+// ============================================
+// THEORY MODAL FUNCTIONS
+// ============================================
+function showTheory(theoryType) {
+    const theory = GRAMMAR_THEORIES[theoryType];
+    if (!theory) return;
+
+    currentTheoryType = theoryType;
+    theoryStartTime = Date.now();
+
+    const modal = document.getElementById('theory-modal');
+    const title = document.getElementById('theory-title');
+    const content = document.getElementById('theory-content');
+    const copyInstruction = document.getElementById('copy-instruction');
+    const timer = document.getElementById('theory-timer');
+
+    title.textContent = theory.title;
+    content.innerHTML = theory.content;
+
+    // Show copy instruction if student got it wrong after seeing theory
+    if (wrongAfterTheory[theoryType]) {
+        copyInstruction.classList.remove('hidden');
+    } else {
+        copyInstruction.classList.add('hidden');
+    }
+
+    modal.classList.remove('hidden');
+
+    // Update timer
+    const timerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - theoryStartTime) / 1000);
+        timer.textContent = \`Czas: \${formatTime(elapsed)}\`;
+    }, 1000);
+
+    // Store interval ID to clear later
+    modal.dataset.timerInterval = timerInterval;
+}
+
+function hideTheory() {
+    const modal = document.getElementById('theory-modal');
+    const timerInterval = modal.dataset.timerInterval;
+    if (timerInterval) {
+        clearInterval(parseInt(timerInterval));
+    }
+    modal.classList.add('hidden');
+}
+
+function handleTheoryUnderstand() {
+    const elapsed = Math.floor((Date.now() - theoryStartTime) / 1000);
+    const minTime = wrongAfterTheory[currentTheoryType] ? 60 : 30; // 60s if must copy, 30s otherwise
+
+    if (elapsed < minTime) {
+        // Show alarm
+        showAlarm();
+    } else {
+        hasSeenTheory[currentTheoryType] = true;
+        hideTheory();
+    }
+}
+
+function showAlarm() {
+    hideTheory();
+
+    const alarm = document.getElementById('alarm-screen');
+    const countdown = document.getElementById('alarm-countdown');
+    alarm.classList.remove('hidden');
+
+    let secondsLeft = 15;
+    countdown.textContent = secondsLeft;
+
+    const alarmInterval = setInterval(() => {
+        secondsLeft--;
+        countdown.textContent = secondsLeft;
+
+        if (secondsLeft <= 0) {
+            clearInterval(alarmInterval);
+            alarm.classList.add('hidden');
+            // Show theory again
+            showTheory(currentTheoryType);
+        }
+    }, 1000);
+}
+
+// ============================================
+// QUESTION RENDERING
+// ============================================
+function renderQuestion(question) {
+    const container = document.getElementById('question-container');
+    container.innerHTML = '';
+
+    const card = document.createElement('div');
+    card.className = 'question-card bg-slate-800/50 backdrop-blur rounded-xl p-8 border border-slate-700';
+
+    let html = \`
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <span class="text-sm text-gray-400">Pytanie \${currentQuestionIndex + 1} z \${QUESTIONS.length}</span>
+                <h2 class="text-2xl font-bold mt-1">Pytanie \${question.id}</h2>
+            </div>
+            <div class="text-right">
+                <div class="text-sm text-gray-400">Czas</div>
+                <div class="text-2xl font-bold text-blue-400 timer-display" id="question-timer">\${formatTime(question.time)}</div>
+            </div>
+        </div>
+    \`;
+
+    // Check if theory required
+    if (question.theory && !hasSeenTheory[question.theory]) {
+        card.innerHTML = html + \`
+            <div class="bg-yellow-900/30 border-2 border-yellow-500 rounded-lg p-6 text-center">
+                <div class="text-5xl mb-4">📚</div>
+                <h3 class="text-xl font-bold mb-2">Najpierw musisz przeczytać teorię!</h3>
+                <p class="text-gray-300 mb-4">To pytanie wymaga znajomości gramatyki.</p>
+                <button onclick="showTheoryForQuestion()" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold">
+                    Pokaż teorię
+                </button>
+            </div>
+        \`;
+        container.appendChild(card);
+        return;
+    }
+
+    // Add image if exists
+    if (question.image) {
+        html += \`<div class="mb-6 flex justify-center">
+            <img src="\${QUIZ_ASSETS[question.image]}" alt="Question image" class="rounded-lg max-w-md w-full">
+        </div>\`;
+    }
+
+    // Add passage for reading questions
+    if (question.passage) {
+        html += \`<div class="bg-slate-900/50 rounded-lg p-6 mb-6 text-gray-300">\${question.passage}</div>\`;
+    }
+
+    html += \`<div class="mb-6"><p class="text-lg text-gray-200">\${question.question}</p></div>\`;
+
+    // Render based on type
+    if (question.type === 'fill-blank') {
+        html += \`
+            <input type="text" id="answer-input" class="w-full bg-slate-900 border-2 border-slate-600 rounded-lg p-4 text-white text-lg focus:border-blue-500 focus:outline-none" placeholder="Wpisz odpowiedź...">
+            <button onclick="submitAnswer()" class="mt-4 px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold text-lg w-full">
+                Sprawdź odpowiedź
+            </button>
+        \`;
+    } else if (question.type === 'multiple-choice') {
+        html += '<div class="space-y-3">';
+        question.options.forEach((option, index) => {
+            html += \`
+                <button onclick="selectOption('\${option}')" class="option-btn w-full text-left bg-slate-900 hover:bg-slate-700 border-2 border-slate-600 rounded-lg p-4 transition" data-option="\${option}">
+                    \${option}
+                </button>
+            \`;
+        });
+        html += '</div>';
+    } else if (question.type === 'drag-drop') {
+        html += '<div class="mb-6 flex flex-wrap gap-2" id="word-bank">';
+        const shuffled = shuffleArray(question.words);
+        shuffled.forEach(word => {
+            html += \`<span class="drag-item bg-blue-600 px-4 py-2 rounded-lg cursor-move" draggable="true" data-word="\${word}">\${word}</span>\`;
+        });
+        html += '</div>';
+
+        html += '<div class="space-y-4" id="drop-zones">';
+        question.items.forEach((item, index) => {
+            html += \`
+                <div class="flex items-center gap-3">
+                    <div class="flex-1">
+                        <p class="text-gray-300 mb-2">\${item.text}</p>
+                        <div class="drop-zone bg-slate-900 border-2 border-dashed border-slate-600 rounded-lg p-4 min-h-[50px]" data-index="\${index}" data-answer="\${item.answer}">
+                            Przeciągnij tutaj
+                        </div>
+                    </div>
+                </div>
+            \`;
+        });
+        html += '</div>';
+
+        html += \`<button onclick="submitDragDrop()" class="mt-6 px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold text-lg w-full">Sprawdź odpowiedzi</button>\`;
+
+    } else if (question.type === 'reorder') {
+        html += '<div class="space-y-3" id="sortable-list">';
+        const shuffled = shuffleArray(question.items);
+        shuffled.forEach(item => {
+            html += \`
+                <div class="sortable-item bg-slate-900 border-2 border-slate-600 rounded-lg p-4 flex items-center gap-3" data-id="\${item.id}" data-order="\${item.order}">
+                    <span class="text-2xl cursor-move">⋮⋮</span>
+                    <span class="flex-1">\${item.text}</span>
+                </div>
+            \`;
+        });
+        html += '</div>';
+        html += \`<button onclick="submitReorder()" class="mt-6 px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold text-lg w-full">Sprawdź kolejność</button>\`;
+
+    } else if (question.type === 'reading') {
+        html += '<div class="space-y-4">';
+        question.questions.forEach((q, index) => {
+            html += \`
+                <div class="bg-slate-900/50 rounded-lg p-4">
+                    <p class="text-gray-300 mb-2">\${index + 1}. \${q.text}</p>
+                    <input type="text" class="reading-input w-full bg-slate-800 border-2 border-slate-600 rounded-lg p-3 text-white" data-index="\${index}" placeholder="Wpisz odpowiedź...">
+                </div>
+            \`;
+        });
+        html += '</div>';
+        html += \`<button onclick="submitReading()" class="mt-6 px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold text-lg w-full">Sprawdź wszystkie odpowiedzi</button>\`;
+    }
+
+    card.innerHTML = html;
+    container.appendChild(card);
+
+    // Setup drag and drop if needed
+    if (question.type === 'drag-drop') {
+        setupDragAndDrop();
+    }
+
+    // Setup sortable if needed
+    if (question.type === 'reorder') {
+        setupSortable();
+    }
+
+    // Start question timer
+    startQuestionTimer(question.time);
+}
+
+// ============================================
+// ANSWER SUBMISSION
+// ============================================
+function submitAnswer() {
+    const question = QUESTIONS[currentQuestionIndex];
+    const input = document.getElementById('answer-input');
+    const userAnswer = input.value;
+
+    const isCorrect = checkAnswer(userAnswer, question.answer, question.alternatives || []);
+
+    if (isCorrect) {
+        score += question.points;
+        showFeedback(true, \`Dobrze! Odpowiedź: \${question.answer}\`);
+        updateScore();
+        setTimeout(() => nextQuestion(), 1500);
+    } else {
+        showFeedback(false, \`Źle! Prawidłowa odpowiedź: \${question.answer}\`);
+
+        // Check if this question required theory and student got it wrong
+        if (question.theory && hasSeenTheory[question.theory]) {
+            wrongAfterTheory[question.theory] = true;
+        }
+
+        setTimeout(() => nextQuestion(), 2500);
+    }
+}
+
+function selectOption(option) {
+    const question = QUESTIONS[currentQuestionIndex];
+    const isCorrect = option === question.answer;
+
+    // Highlight selected
+    document.querySelectorAll('.option-btn').forEach(btn => {
+        btn.classList.remove('border-blue-500');
+        if (btn.dataset.option === option) {
+            btn.classList.add('border-blue-500');
+        }
+    });
+
+    if (isCorrect) {
+        score += question.points;
+        showFeedback(true, 'Dobrze!');
+        updateScore();
+        setTimeout(() => nextQuestion(), 1500);
+    } else {
+        showFeedback(false, \`Źle! Prawidłowa odpowiedź: \${question.answer}\`);
+
+        if (question.theory && hasSeenTheory[question.theory]) {
+            wrongAfterTheory[question.theory] = true;
+        }
+
+        setTimeout(() => nextQuestion(), 2500);
+    }
+}
+
+function submitDragDrop() {
+    const question = QUESTIONS[currentQuestionIndex];
+    const dropZones = document.querySelectorAll('.drop-zone');
+    let correct = 0;
+
+    dropZones.forEach(zone => {
+        const droppedItem = zone.querySelector('.drag-item');
+        if (droppedItem) {
+            const userAnswer = droppedItem.dataset.word;
+            const correctAnswer = zone.dataset.answer;
+
+            if (normalizeAnswer(userAnswer) === normalizeAnswer(correctAnswer)) {
+                zone.classList.add('correct');
+                correct++;
+            } else {
+                zone.classList.add('incorrect');
+            }
+        }
+    });
+
+    const allCorrect = correct === question.items.length;
+
+    if (allCorrect) {
+        score += question.points;
+        showFeedback(true, 'Wszystkie odpowiedzi poprawne!');
+        updateScore();
+        setTimeout(() => nextQuestion(), 2000);
+    } else {
+        showFeedback(false, \`Poprawnych: \${correct}/\${question.items.length}\`);
+
+        if (question.theory && hasSeenTheory[question.theory]) {
+            wrongAfterTheory[question.theory] = true;
+        }
+
+        setTimeout(() => nextQuestion(), 3000);
+    }
+}
+
+function submitReorder() {
+    const question = QUESTIONS[currentQuestionIndex];
+    const sortableItems = document.querySelectorAll('.sortable-item');
+    let correct = 0;
+
+    sortableItems.forEach((item, index) => {
+        const expectedOrder = parseInt(item.dataset.order);
+        const actualOrder = index + 1;
+
+        if (expectedOrder === actualOrder) {
+            item.classList.add('correct');
+            correct++;
+        } else {
+            item.classList.add('incorrect');
+        }
+    });
+
+    const allCorrect = correct === question.items.length;
+
+    if (allCorrect) {
+        score += question.points;
+        showFeedback(true, 'Kolejność poprawna!');
+        updateScore();
+        setTimeout(() => nextQuestion(), 2000);
+    } else {
+        showFeedback(false, \`Poprawnych: \${correct}/\${question.items.length}\`);
+        setTimeout(() => nextQuestion(), 3000);
+    }
+}
+
+function submitReading() {
+    const question = QUESTIONS[currentQuestionIndex];
+    const inputs = document.querySelectorAll('.reading-input');
+    let correct = 0;
+
+    inputs.forEach((input, index) => {
+        const q = question.questions[index];
+        const userAnswer = input.value;
+        const isCorrect = checkAnswer(userAnswer, q.answer, q.alternatives || []);
+
+        if (isCorrect) {
+            input.classList.add('correct');
+            correct++;
+        } else {
+            input.classList.add('incorrect');
+        }
+    });
+
+    score += correct;
+
+    if (correct === question.questions.length) {
+        showFeedback(true, 'Wszystkie odpowiedzi poprawne!');
+    } else {
+        showFeedback(false, \`Poprawnych: \${correct}/\${question.questions.length}\`);
+    }
+
+    updateScore();
+    setTimeout(() => nextQuestion(), 3000);
+}
+
+function showFeedback(isCorrect, message) {
+    const container = document.getElementById('question-container');
+    const feedback = document.createElement('div');
+    feedback.className = \`mt-4 p-4 rounded-lg \${isCorrect ? 'bg-green-900/50 border border-green-500' : 'bg-red-900/50 border border-red-500'}\`;
+    feedback.innerHTML = \`
+        <p class="font-semibold \${isCorrect ? 'text-green-300' : 'text-red-300'}">\${message}</p>
+    \`;
+    container.appendChild(feedback);
+}
+
+// ============================================
+// DRAG AND DROP SETUP
+// ============================================
+function setupDragAndDrop() {
+    const draggables = document.querySelectorAll('.drag-item');
+    const dropZones = document.querySelectorAll('.drop-zone');
+
+    draggables.forEach(draggable => {
+        draggable.addEventListener('dragstart', () => {
+            draggable.classList.add('dragging');
+        });
+
+        draggable.addEventListener('dragend', () => {
+            draggable.classList.remove('dragging');
+        });
+    });
+
+    dropZones.forEach(zone => {
+        zone.addEventListener('dragover', e => {
+            e.preventDefault();
+            zone.classList.add('drag-over');
+        });
+
+        zone.addEventListener('dragleave', () => {
+            zone.classList.remove('drag-over');
+        });
+
+        zone.addEventListener('drop', e => {
+            e.preventDefault();
+            zone.classList.remove('drag-over');
+
+            const dragging = document.querySelector('.dragging');
+            if (dragging) {
+                // Clear zone if already filled
+                zone.innerHTML = '';
+
+                // Clone the item
+                const clone = dragging.cloneNode(true);
+                zone.appendChild(clone);
+                zone.classList.add('filled');
+
+                // Hide original
+                dragging.style.display = 'none';
+            }
+        });
+    });
+}
+
+// ============================================
+// SORTABLE SETUP (Simple version)
+// ============================================
+function setupSortable() {
+    const list = document.getElementById('sortable-list');
+    let draggedItem = null;
+
+    const items = list.querySelectorAll('.sortable-item');
+    items.forEach(item => {
+        item.draggable = true;
+
+        item.addEventListener('dragstart', function() {
+            draggedItem = this;
+            setTimeout(() => this.style.opacity = '0.5', 0);
+        });
+
+        item.addEventListener('dragend', function() {
+            setTimeout(() => this.style.opacity = '1', 0);
+        });
+
+        item.addEventListener('dragover', function(e) {
+            e.preventDefault();
+        });
+
+        item.addEventListener('drop', function(e) {
+            e.preventDefault();
+            if (this !== draggedItem) {
+                let allItems = [...list.querySelectorAll('.sortable-item')];
+                let draggedIndex = allItems.indexOf(draggedItem);
+                let targetIndex = allItems.indexOf(this);
+
+                if (draggedIndex < targetIndex) {
+                    this.parentNode.insertBefore(draggedItem, this.nextSibling);
+                } else {
+                    this.parentNode.insertBefore(draggedItem, this);
+                }
+            }
+        });
+    });
+}
+
+// ============================================
+// NAVIGATION
+// ============================================
+function nextQuestion() {
+    currentQuestionIndex++;
+
+    if (currentQuestionIndex >= QUESTIONS.length) {
+        finishQuiz();
+        return;
+    }
+
+    updateProgress();
+    renderQuestion(QUESTIONS[currentQuestionIndex]);
+    updateNavigationButtons();
+}
+
+function previousQuestion() {
+    if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        updateProgress();
+        renderQuestion(QUESTIONS[currentQuestionIndex]);
+        updateNavigationButtons();
+    }
+}
+
+function updateNavigationButtons() {
+    document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
+    document.getElementById('next-btn').textContent = currentQuestionIndex === QUESTIONS.length - 1 ? 'Zakończ ✓' : 'Następne →';
+}
+
+function updateProgress() {
+    const percentage = (currentQuestionIndex / QUESTIONS.length) * 100;
+    document.getElementById('progress-bar').style.width = \`\${percentage}%\`;
+    document.getElementById('progress-text').textContent = \`\${currentQuestionIndex}/\${QUESTIONS.length}\`;
+}
+
+function updateScore() {
+    document.getElementById('score-value').textContent = score;
+}
+
+// ============================================
+// TIMER
+// ============================================
+function startQuizTimer() {
+    timerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - quizStartTime) / 1000);
+        document.getElementById('quiz-timer').textContent = formatTime(elapsed);
+    }, 1000);
+}
+
+function startQuestionTimer(duration) {
+    const timerEl = document.getElementById('question-timer');
+    if (!timerEl) return;
+
+    let timeLeft = duration;
+    questionStartTime = Date.now();
+
+    const interval = setInterval(() => {
+        timeLeft--;
+        if (timerEl) {
+            timerEl.textContent = formatTime(timeLeft);
+
+            if (timeLeft <= 10) {
+                timerEl.classList.add('text-red-400');
+            }
+        }
+
+        if (timeLeft <= 0) {
+            clearInterval(interval);
+            // Auto-submit or skip question
+            showFeedback(false, 'Czas minął!');
+            setTimeout(() => nextQuestion(), 2000);
+        }
+    }, 1000);
+}
+
+// ============================================
+// LEADERBOARD
+// ============================================
+function updateLeaderboard() {
+    const list = document.getElementById('leaderboard-list');
+    list.innerHTML = '';
+
+    // Sort by score desc, then time asc
+    const sorted = [...leaderboard].sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return a.time.localeCompare(b.time);
+    });
+
+    sorted.forEach((entry, index) => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center gap-2 bg-slate-900/50 rounded-lg p-2';
+        div.innerHTML = \`
+            <span class="text-lg">\${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '👤'}</span>
+            <span class="flex-1">\${entry.name}</span>
+            <span class="font-bold text-green-400">\${entry.score}</span>
+        \`;
+        list.appendChild(div);
+    });
+}
+
+// ============================================
+// FINISH QUIZ
+// ============================================
+function finishQuiz() {
+    const elapsed = Math.floor((Date.now() - quizStartTime) / 1000);
+    const timeStr = formatTime(elapsed);
+
+    // Add to leaderboard
+    if (studentName) {
+        leaderboard.push({
+            name: studentName,
+            score: score,
+            time: timeStr
+        });
+        updateLeaderboard();
+    }
+
+    const container = document.getElementById('question-container');
+    container.innerHTML = \`
+        <div class="text-center bg-slate-800/50 backdrop-blur rounded-xl p-12 border border-slate-700">
+            <div class="text-8xl mb-6">🎉</div>
+            <h2 class="text-4xl font-bold mb-4">Quiz ukończony!</h2>
+            <div class="text-6xl font-bold text-green-400 mb-6">\${score} / \${QUESTIONS.reduce((sum, q) => sum + q.points, 0)}</div>
+            <p class="text-xl text-gray-300 mb-4">Czas: \${timeStr}</p>
+            <p class="text-lg text-gray-400 mb-8">Świetna robota, \${studentName || 'uczniu'}!</p>
+            <button onclick="location.reload()" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold text-lg">
+                Spróbuj ponownie
+            </button>
+        </div>
+    \`;
+
+    clearInterval(timerInterval);
+}
+
+// ============================================
+// GLOBAL FUNCTIONS (for onclick)
+// ============================================
+window.showTheoryForQuestion = function() {
+    const question = QUESTIONS[currentQuestionIndex];
+    showTheory(question.theory);
+};
+
+window.submitAnswer = submitAnswer;
+window.selectOption = selectOption;
+window.submitDragDrop = submitDragDrop;
+window.submitReorder = submitReorder;
+window.submitReading = submitReading;
+
+// ============================================
+// INITIALIZATION
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Get student name
+    const nameInput = document.getElementById('student-name');
+    nameInput.addEventListener('change', (e) => {
+        studentName = e.target.value;
+    });
+
+    // Setup navigation
+    document.getElementById('prev-btn').addEventListener('click', previousQuestion);
+    document.getElementById('next-btn').addEventListener('click', nextQuestion);
+
+    // Setup theory button
+    document.getElementById('theory-understand-btn').addEventListener('click', handleTheoryUnderstand);
+
+    // Start timers
+    startQuizTimer();
+
+    // Update leaderboard
+    updateLeaderboard();
+
+    // Render first question
+    renderQuestion(QUESTIONS[currentQuestionIndex]);
+    updateNavigationButtons();
+    updateProgress();
+});
+</script>
+
+</body>
+</html>
+`;
+
+window.generateSingle = generateSingle;
+</script>
+
+</body>
+</html>
