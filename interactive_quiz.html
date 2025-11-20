@@ -209,6 +209,11 @@
 // QUIZ DATA & CONFIGURATION
 // ============================================
 
+// BACKEND CONFIGURATION
+// Set USE_BACKEND to true and provide your API URL to enable persistent leaderboard
+const USE_BACKEND = false; // Change to true to enable PHP backend
+const LEADERBOARD_API = 'http://your-vps/api/leaderboard.php'; // Change to your backend URL
+
 // Placeholder for assets - replace with generated assets from Canvas app
 const QUIZ_ASSETS = {
     'fish': 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="%23334155" width="200" height="200"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%23cbd5e1" font-size="16">Fish Image</text></svg>',
@@ -1224,22 +1229,55 @@ function startQuestionTimer(duration) {
 // ============================================
 // LEADERBOARD
 // ============================================
-function updateLeaderboard() {
+async function updateLeaderboard() {
+    const list = document.getElementById('leaderboard-list');
+    list.innerHTML = '<p class="text-gray-400 text-sm text-center">Ładowanie...</p>';
+
+    if (!USE_BACKEND) {
+        // Use local leaderboard (offline mode)
+        renderLeaderboard(leaderboard);
+        return;
+    }
+
+    // Fetch from backend
+    try {
+        const response = await fetch(LEADERBOARD_API);
+        const data = await response.json();
+
+        if (data.success) {
+            renderLeaderboard(data.scores);
+        } else {
+            throw new Error('Backend returned error');
+        }
+    } catch (error) {
+        console.error('Leaderboard fetch error:', error);
+        list.innerHTML = '<p class="text-red-400 text-sm text-center">⚠️ Błąd wczytywania</p>';
+        // Fallback to local
+        setTimeout(() => renderLeaderboard(leaderboard), 2000);
+    }
+}
+
+function renderLeaderboard(scores) {
     const list = document.getElementById('leaderboard-list');
     list.innerHTML = '';
 
+    if (!scores || scores.length === 0) {
+        list.innerHTML = '<p class="text-gray-400 text-sm text-center">Brak wyników</p>';
+        return;
+    }
+
     // Sort by score desc, then time asc
-    const sorted = [...leaderboard].sort((a, b) => {
+    const sorted = [...scores].sort((a, b) => {
         if (b.score !== a.score) return b.score - a.score;
         return a.time.localeCompare(b.time);
     });
 
-    sorted.forEach((entry, index) => {
+    sorted.slice(0, 20).forEach((entry, index) => {
         const div = document.createElement('div');
         div.className = 'flex items-center gap-2 bg-slate-900/50 rounded-lg p-2';
         div.innerHTML = `
             <span class="text-lg">${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '👤'}</span>
-            <span class="flex-1">${entry.name}</span>
+            <span class="flex-1 truncate">${entry.name}</span>
             <span class="font-bold text-green-400">${entry.score}</span>
         `;
         list.appendChild(div);
@@ -1249,27 +1287,67 @@ function updateLeaderboard() {
 // ============================================
 // FINISH QUIZ
 // ============================================
-function finishQuiz() {
+async function finishQuiz() {
     const elapsed = Math.floor((Date.now() - quizStartTime) / 1000);
     const timeStr = formatTime(elapsed);
+    let rank = null;
 
-    // Add to leaderboard
+    // Submit to backend if enabled
+    if (USE_BACKEND && studentName) {
+        try {
+            const response = await fetch(LEADERBOARD_API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: studentName,
+                    score: score,
+                    time: timeStr
+                })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                rank = data.rank;
+                console.log('Score submitted! Rank:', rank);
+                await updateLeaderboard(); // Refresh leaderboard
+            } else {
+                console.error('Backend error:', data.error);
+            }
+        } catch (error) {
+            console.error('Failed to submit score:', error);
+        }
+    }
+
+    // Add to local leaderboard (fallback or offline mode)
     if (studentName) {
         leaderboard.push({
             name: studentName,
             score: score,
             time: timeStr
         });
-        updateLeaderboard();
+        if (!USE_BACKEND) {
+            updateLeaderboard();
+        }
     }
 
     const container = document.getElementById('question-container');
+    const maxScore = QUESTIONS.reduce((sum, q) => sum + q.points, 0);
+    const percentage = Math.round((score / maxScore) * 100);
+
+    let rankMessage = '';
+    if (rank) {
+        const medals = { 1: '🥇', 2: '🥈', 3: '🥉' };
+        rankMessage = `<p class="text-2xl font-bold mb-4">${medals[rank] || '🏅'} Miejsce ${rank} w rankingu!</p>`;
+    }
+
     container.innerHTML = `
         <div class="text-center bg-slate-800/50 backdrop-blur rounded-xl p-12 border border-slate-700">
             <div class="text-8xl mb-6">🎉</div>
             <h2 class="text-4xl font-bold mb-4">Quiz ukończony!</h2>
-            <div class="text-6xl font-bold text-green-400 mb-6">${score} / ${QUESTIONS.reduce((sum, q) => sum + q.points, 0)}</div>
-            <p class="text-xl text-gray-300 mb-4">Czas: ${timeStr}</p>
+            <div class="text-6xl font-bold text-green-400 mb-6">${score} / ${maxScore}</div>
+            <p class="text-xl text-gray-300 mb-2">Wynik: ${percentage}%</p>
+            <p class="text-lg text-gray-400 mb-4">Czas: ${timeStr}</p>
+            ${rankMessage}
             <p class="text-lg text-gray-400 mb-8">Świetna robota, ${studentName || 'uczniu'}!</p>
             <button onclick="location.reload()" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold text-lg">
                 Spróbuj ponownie
