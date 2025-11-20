@@ -1120,7 +1120,7 @@ class Player {
         };
 
         this.targetCameraPosition = new THREE.Vector3();
-        this.currentCameraPosition = new THREE.Vector3().copy(this.body.position).y += 1.6;
+        this.currentCameraPosition = new THREE.Vector3(this.body.position.x, this.body.position.y + 1.6, this.body.position.z);
         this.cameraBob = 0;
         this.cameraBobSpeed = 0;
         this.walkBobTime = 0;
@@ -1173,7 +1173,8 @@ class Player {
         if (this.body.position.y < -20) {
             this.body.position.copy(this.lastSafePos);
             this.body.velocity.set(0, 0, 0);
-            this.currentCameraPosition.copy(this.body.position).y += 1.6;
+            this.currentCameraPosition.copy(this.body.position);
+            this.currentCameraPosition.y += 1.6;
             stepUpTarget = null;
         }
     }
