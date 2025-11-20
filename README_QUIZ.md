@@ -16,34 +16,44 @@ System składa się z dwóch plików:
 
 ## Krok 2: Integracja obrazków z quizem
 
+**Automatycznie:**
+Po kliknięciu "Download All Assets":
+- Assety są AUTOMATYCZNIE kopiowane do schowka
+- Pobiera się plik `quiz_assets.js` jako backup
+
+**Manualnie wklej do quizu:**
 1. Otwórz plik `interactive_quiz.html` w edytorze tekstu
-2. Znajdź sekcję oznaczoną:
-   ```javascript
-   // Placeholder for assets - replace with generated assets from Canvas app
-   const QUIZ_ASSETS = {
-   ```
-3. Otwórz pobrany plik `quiz_assets.js`
-4. Skopiuj całą zawartość i zastąp istniejący obiekt `QUIZ_ASSETS` w pliku quiz
+2. Znajdź linię: `const QUIZ_ASSETS = {`
+3. Zaznacz cały obiekt (od `const` do `};`)
+4. **Wklej** skopiowane assety (`Ctrl+V` / `Cmd+V`)
+5. Zapisz plik
+
+Gotowe! Plik `interactive_quiz.html` ma teraz wszystkie obrazki wbudowane.
 
 ## Krok 3: Wdrożenie na VPS
 
-### Opcja A: Prosty serwer HTTP (Python)
+**WAŻNE:** Wybierz JEDNĄ z poniższych opcji. To są ALTERNATYWY, nie zależności!
+
+### Opcja A: Python Server (najprostsze - do testów)
+
+✅ Nie wymaga instalacji
+✅ Działa natychmiast
+❌ Tylko do testów (nie dla produkcji)
 
 ```bash
 # Wgraj plik na serwer
-scp interactive_quiz.html user@your-vps:~/quiz/
+scp interactive_quiz.html user@your-vps:~/
 
 # Zaloguj się na VPS
 ssh user@your-vps
 
-# Uruchom prosty serwer HTTP
-cd ~/quiz
+# Uruchom serwer
 python3 -m http.server 8080
 ```
 
-Teraz quiz będzie dostępny pod adresem: `http://your-vps-ip:8080/interactive_quiz.html`
+Quiz dostępny: `http://your-vps-ip:8080/interactive_quiz.html`
 
-### Opcja B: Nginx (produkcja)
+### Opcja B: Nginx (PRODUKCJA - polecane)
 
 1. Zainstaluj Nginx:
 ```bash
@@ -80,7 +90,11 @@ sudo systemctl restart nginx
 
 Quiz będzie dostępny pod: `http://your-domain.com/`
 
-### Opcja C: Apache
+### Opcja C: Apache (alternatywa dla Nginx)
+
+✅ Dobry dla produkcji
+✅ Łatwy w konfiguracji
+⚠️  Cięższy niż Nginx
 
 1. Zainstaluj Apache:
 ```bash
@@ -99,6 +113,14 @@ sudo systemctl restart apache2
 ```
 
 Quiz dostępny: `http://your-vps-ip/quiz.html`
+
+---
+
+**Podsumowanie opcji serwerów:**
+- **Python** - do testów lokalnych, natychmiastowe uruchomienie
+- **Nginx** - najlepsza wydajność, najmniej zasobów, produkcja
+- **Apache** - łatwiejsza konfiguracja, więcej zasobów, produkcja
+- **PHP** - NIE POTRZEBUJESZ! (chyba że chcesz backend dla leaderboard - patrz sekcja niżej)
 
 ## Funkcje quizu
 

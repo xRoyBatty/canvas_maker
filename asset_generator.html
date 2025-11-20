@@ -41,7 +41,7 @@
                 🎨 Generate All Assets
             </button>
             <button id="download-all-btn" class="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition" disabled>
-                ⬇️ Download All Assets as ZIP
+                ⬇️ Pobierz Assety (Kopiuj + Plik)
             </button>
         </div>
         <div id="progress" class="hidden">
@@ -205,16 +205,24 @@ async function generateSingle(assetId) {
 }
 
 function downloadAllAssets() {
-    // Create a text file with all base64 data that can be copy-pasted into the quiz
-    let content = 'const QUIZ_ASSETS = {\n';
+    // Build the QUIZ_ASSETS object
+    let assetsCode = 'const QUIZ_ASSETS = {\n';
 
     for (const [id, data] of Object.entries(generatedAssets)) {
-        content += `  '${id}': 'data:image/png;base64,${data.base64}',\n`;
+        assetsCode += `    '${id}': 'data:image/png;base64,${data.base64}',\n`;
     }
 
-    content += '};\n';
+    assetsCode += '};';
 
-    const blob = new Blob([content], { type: 'text/javascript' });
+    // Copy to clipboard for easy paste
+    navigator.clipboard.writeText(assetsCode).then(() => {
+        console.log('Assety skopiowane do schowka!');
+    }).catch(err => {
+        console.error('Nie można skopiować do schowka:', err);
+    });
+
+    // Also download as file
+    const blob = new Blob([assetsCode], { type: 'text/javascript' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -224,7 +232,31 @@ function downloadAllAssets() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    alert('Assets downloaded! Copy the content of quiz_assets.js into your quiz HTML file.');
+    // Show instructions
+    const instructions = `
+✅ ASSETY WYGENEROWANE!
+
+KR OK 1: Assety skopiowane do schowka i pobrane jako quiz_assets.js
+
+KROK 2: Wklej assety do quizu:
+
+1. Otwórz plik interactive_quiz.html w edytorze
+2. Znajdź linię:  const QUIZ_ASSETS = {
+3. Zaznacz cały obiekt QUIZ_ASSETS (od const do };)
+4. Wklej skopiowane assety (Ctrl+V)
+5. Zapisz plik
+
+KROK 3: Wgraj na VPS:
+   scp interactive_quiz.html user@twój-vps:~/
+   ssh user@twój-vps
+   python3 -m http.server 8080
+
+Quiz dostępny na: http://twój-vps-ip:8080/interactive_quiz.html
+
+Gotowe! 🎉
+    `;
+
+    alert(instructions);
 }
 
 // Initialize
