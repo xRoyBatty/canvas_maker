@@ -42,8 +42,12 @@
 6. **Edytuj quiz** (`interactive_quiz_READY.html`):
    ```javascript
    const USE_BACKEND = true; // Zmień na true
-   const LEADERBOARD_API = 'http://twój-vps/api/leaderboard.php'; // Twój URL
+   const LEADERBOARD_API = '/api/leaderboard.php'; // Względny URL (zalecane!)
+   // ALTERNATYWNIE pełny URL:
+   // const LEADERBOARD_API = 'https://twój-vps.eu/api/leaderboard.php';
    ```
+
+   **💡 Tip:** Używaj względnego URL (`/api/...`) zamiast pełnego - automatycznie obsłuży HTTP/HTTPS!
 
 7. **Wgraj quiz:**
    ```bash
