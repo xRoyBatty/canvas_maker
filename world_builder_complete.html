@@ -521,11 +521,16 @@ class Game {
         this.initWorld();
         this.initUI();
         this.initPlayer();
-        this.loadGameState().then(() => {
+        this.loadGameState().then(async () => {
             // Initialize quests
             gameState.quests.push({ ...QUEST_TEMPLATES[0], progress: 0, active: true });
             gameState.quests.push({ ...QUEST_TEMPLATES[1], progress: 0, active: true });
             uiManager.updateQuestUI();
+
+            // Auto-generate all textures
+            updateLoadingProgress(92, 'Generating textures...');
+            await this.generateAllTextures();
+
             this.startGame();
         });
     }
@@ -837,6 +842,26 @@ class Game {
         } catch (error) {
             console.error('Failed to save game:', error);
             uiManager.showNotification('Save failed', 'error');
+        }
+    }
+
+    async generateAllTextures() {
+        try {
+            // Generate block textures
+            const blockTypes = ['wood', 'stone', 'clay', 'brick'];
+            for (let i = 0; i < blockTypes.length; i++) {
+                const type = blockTypes[i];
+                updateLoadingProgress(92 + (i * 2), `Generating ${type} texture...`);
+                await uiManager.generateTextureFor(type, true); // silent = true
+            }
+
+            // Generate tool textures (optional, comment out if it takes too long)
+            // updateLoadingProgress(98, 'Generating tool textures...');
+            // await uiManager.generateRealisticTool('axe');
+            // await uiManager.generateRealisticTool('pickaxe');
+        } catch (error) {
+            console.error('Texture generation failed:', error);
+            // Continue anyway - game will use default colors
         }
     }
 
@@ -1724,7 +1749,7 @@ class UIManager {
         document.getElementById('kiln-start').style.opacity = canStart ? '1' : '0.5';
     }
 
-    async generateTextureFor(type) {
+    async generateTextureFor(type, silent = false) {
         const material = materials.blocks[type];
         const prompts = {
             wood: "Seamless realistic oak wood texture, natural wood grain, brown color, 4K detail, tileable",
@@ -1734,8 +1759,10 @@ class UIManager {
         };
 
         if (!prompts[type]) return;
-        await this.generateTexture(material, prompts[type]);
-        this.showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} texture generated!`);
+        await this.generateTexture(material, prompts[type], silent);
+        if (!silent) {
+            this.showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} texture generated!`);
+        }
     }
 
     async generateRealisticTool(toolType) {
@@ -1782,8 +1809,10 @@ class UIManager {
         }
     }
 
-    async generateTexture(material, prompt) {
-        document.getElementById('loader').classList.remove('hidden');
+    async generateTexture(material, prompt, silent = false) {
+        if (!silent) {
+            document.getElementById('loader').classList.remove('hidden');
+        }
         try {
             const result = await callWithRetry(async () => {
                 const apiKey = "";
@@ -1825,9 +1854,13 @@ class UIManager {
 
         } catch (error) {
             console.error('Texture generation failed:', error);
-            this.showNotification('Texture generation failed', 'error');
+            if (!silent) {
+                this.showNotification('Texture generation failed', 'error');
+            }
         } finally {
-            document.getElementById('loader').classList.add('hidden');
+            if (!silent) {
+                document.getElementById('loader').classList.add('hidden');
+            }
         }
     }
 
