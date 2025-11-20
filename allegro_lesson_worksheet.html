@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 1: Fleet & Hubs - Interactive Worksheet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f9fafb;
+        }
+
+        .worksheet-page {
+            display: none;
+            background: white;
+            padding: 3rem;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+        .worksheet-page.active { display: block; }
+
+        .section-header {
+            background: linear-gradient(135deg, #ff5a00 0%, #ff7a30 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .content-box {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .vocab-card {
+            background: white;
+            border: 2px solid #ff5a00;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .vocab-card:hover {
+            background: #fff7ed;
+            transform: translateX(5px);
+        }
+
+        .vocab-card.revealed {
+            background: #d1fae5;
+            border-color: #10b981;
+        }
+
+        .question-box {
+            background: white;
+            border-left: 4px solid #ff5a00;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .input-field {
+            background: white;
+            border: 2px solid #d1d5db;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #ff5a00;
+        }
+
+        .btn-primary {
+            background: #ff5a00;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: #ff7a30;
+        }
+
+        .btn-audio {
+            background: #9333ea;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 1rem 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-audio:hover {
+            background: #a855f7;
+        }
+
+        .option-box {
+            background: white;
+            border: 2px solid #d1d5db;
+            padding: 1rem 1.5rem;
+            margin: 0.5rem 0;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option-box:hover {
+            border-color: #ff5a00;
+            background: #fff7ed;
+        }
+
+        .option-box.selected {
+            background: #fed7aa;
+            border-color: #ff5a00;
+        }
+
+        .option-box.correct {
+            background: #d1fae5;
+            border-color: #10b981;
+        }
+
+        .option-box.incorrect {
+            background: #fee2e2;
+            border-color: #ef4444;
+        }
+
+        .feedback-box {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .feedback-box.show {
+            display: block;
+        }
+
+        .reading-passage {
+            background: white;
+            border: 2px solid #d1d5db;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .structure-box {
+            background: #eff6ff;
+            border: 3px solid #3b82f6;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 2rem 0;
+        }
+
+        .example-box {
+            background: #f0fdf4;
+            border-left: 4px solid #10b981;
+            padding: 1rem 1.5rem;
+            margin: 0.75rem 0;
+            font-size: 1.1rem;
+        }
+
+        .chart-container {
+            background: white;
+            border: 2px solid #e5e7eb;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .image-container {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+            border: 2px solid #e5e7eb;
+        }
+
+        .timer-badge {
+            background: #1f2937;
+            color: #ff5a00;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: bold;
+            display: inline-block;
+            margin: 1rem 0;
+        }
+
+        .word-building-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .word-building-table th,
+        .word-building-table td {
+            border: 2px solid #d1d5db;
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .word-building-table th {
+            background: #f3f4f6;
+            font-weight: 600;
+        }
+
+        .word-building-table input {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Progress Screen -->
+<div id="progress-screen" class="fixed inset-0 bg-gray-900 flex items-center justify-center z-50">
+    <div class="bg-gray-800 rounded-xl shadow-2xl p-8 max-w-2xl w-full mx-4">
+        <h1 class="text-2xl font-bold text-white mb-6 text-center">Loading Worksheet...</h1>
+        <div class="space-y-4">
+            <div id="progress-log" class="bg-gray-900 rounded-lg p-4 h-64 overflow-y-auto text-sm font-mono text-green-400">
+                <div>→ Initializing...</div>
+            </div>
+            <div class="bg-gray-700 rounded-full h-2 overflow-hidden">
+                <div id="progress-bar" class="bg-orange-500 h-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Worksheet Container -->
+<div id="worksheet-container" class="hidden">
+    <div class="max-w-5xl mx-auto">
+
+        <!-- Navigation Header -->
+        <div class="sticky top-0 bg-white shadow-md z-40 px-6 py-4 flex items-center justify-between">
+            <button id="prev-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-6 rounded">
+                ← Previous
+            </button>
+            <div class="flex items-center gap-4">
+                <span id="page-counter" class="text-gray-700 font-semibold text-lg">1 / 16</span>
+                <button id="audio-btn" class="btn-audio">
+                    🔊 Listen
+                </button>
+            </div>
+            <button id="next-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-6 rounded">
+                Next →
+            </button>
+        </div>
+
+        <!-- Worksheet Pages Container -->
+        <div id="pages-container"></div>
+
+    </div>
+</div>
+
+<!-- Hidden Canvas for Image Compression -->
+<canvas id="compression-canvas" style="display: none;"></canvas>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // ============================================
+    // WORKSHEET DATA - ALL PAGES
+    // ============================================
+    const WORKSHEET_DATA = {
+        title: "Module 1: Fleet & Hubs Management",
+        level: "A1/A2 English for Logistics",
+        duration: "45 minutes",
+        pages: [
+            // PAGE 1: WARM-UP
+            {
+                id: "warmup",
+                title: "Warm-Up: Quick Check-In",
+                content: `
+                    <div class="section-header">
+                        <h2 class="text-2xl font-bold">Welcome! Let's Start</h2>
+                        <p class="text-sm mt-1 opacity-90">Answer these questions about yourself</p>
+                    </div>
+
+                    <div class="question-box">
+                        <p class="font-semibold mb-2">1. Where are you now?</p>
+                        <input type="text" class="input-field" placeholder="Example: At home, at the hub, in the car...">
+                    </div>
+
+                    <div class="question-box">
+                        <p class="font-semibold mb-2">2. What time is it?</p>
+                        <input type="text" class="input-field" placeholder="Example: 10:30 AM">
+                    </div>
+
+                    <div class="question-box">
+                        <p class="font-semibold mb-2">3. How are you today?</p>
+                        <input type="text" class="input-field" placeholder="Example: Good, busy, tired...">
+                    </div>
+
+                    <div class="question-box">
+                        <p class="font-semibold mb-2">4. Did you drive today?</p>
+                        <input type="text" class="input-field" placeholder="Yes / No">
+                    </div>
+                `,
+                narration: "Hello! Welcome to Module 1. Today we learn about your fleet and hubs. First, let me ask you some questions. Where are you now? What time is it? How are you today? Did you drive today? Please answer each question.",
+                hasImage: true,
+                imagePrompt: "Modern professional video call background, blurred home office, warm lighting, laptop visible, neutral professional atmosphere"
+            },
+
+            // PAGE 2: PREREQUISITES CHECK
+            {
+                id: "prereq",
+                title: "Before We Start: Check Your Knowledge",
+                content: `
+                    <div class="section-header">
+                        <h2 class="text-2xl font-bold">Do you know these words?</h2>
+                        <p class="text-sm mt-1 opacity-90">Click each box when you understand the word</p>
+                    </div>
+
+                    <div class="vocab-card" onclick="this.classList.toggle('revealed')">
+                        <div class="font-bold text-xl text-gray-900">NUMBERS</div>
+                        <p class="text-gray-600 mt-2">10, 20, 50, 100</p>
+                    </div>
+
+                    <div class="vocab-card" onclick="this.classList.toggle('revealed')">
+                        <div class="font-bold text-xl text-gray-900">ADJECTIVES: Good ≠ Bad</div>
+                        <p class="text-gray-600 mt-2">The machine is <strong>good</strong>. / The machine is <strong>bad</strong>.</p>
+                    </div>
+
+                    <div class="vocab-card" onclick="this.classList.toggle('revealed')">
+                        <div class="font-bold text-xl text-gray-900">ADJECTIVES: Big ≠ Small</div>
+                        <p class="text-gray-600 mt-2">A <strong>big</strong> truck. / A <strong>small</strong> van.</p>
+                    </div>
+
+                    <div class="vocab-card" onclick="this.classList.toggle('revealed')">
+                        <div class="font-bold text-xl text-gray-900">ADJECTIVES: New ≠ Old</div>
+                        <p class="text-gray-600 mt-2">A <strong>new</strong> vehicle. / An <strong>old</strong> vehicle.</p>
+                    </div>
+                `,
+                narration: "Before we start, let's check your knowledge. Do you know numbers? Ten, twenty, fifty, one hundred. Do you know good and bad? Big and small? New and old? Click each box when you understand it. If you don't understand, ask your teacher now.",
+                hasImage: true,
+                imagePrompt: "Simple clean infographic showing numbers 10 50 100, thumbs up and thumbs down icons, minimalist business style, white background"
+            },
+
+            // PAGE 3: FLEET VOCABULARY
+            {
+                id: "vocab-fleet",
+                title: "Vocabulary 1: The Fleet (Your Vehicles)",
+                content: `
+                    <div class="section-header">
+                        <h2 class="text-2xl font-bold">Learn These 3 Words</h2>
+                        <p class="text-sm mt-1 opacity-90">Listen and repeat each word</p>
+                    </div>
+
+                    <div class="vocab-card" onclick="this.classList.toggle('revealed')">
+                        <div class="font-bold text-2xl" style="color: #ff5a00;">VAN</div>
+                        <p class="text-gray-600 mt-2 text-lg">A small delivery vehicle</p>
+                        <p class="text-gray-500 text-sm mt-1">Example: "We have 50 vans in our fleet."</p>
+                    </div>
+
+                    <div class="vocab-card" onclick="this.classList.toggle('revealed')">
+                        <div class="font-bold text-2xl" style="color: #ff5a00;">LORRY / TRUCK</div>
+                        <p class="text-gray-600 mt-2 text-lg">A big vehicle for heavy loads</p>
+                        <p class="text-gray-500 text-sm mt-1">Example: "The lorry carries 20 tons."</p>
+                    </div>
+
+                    <div class="vocab-card" onclick="this.classList.toggle('revealed')">
+                        <div class="font-bold text-2xl" style="color: #ff5a00;">FLEET</div>
+                        <p class="text-gray-600 mt-2 text-lg">All your vehicles together</p>
+                        <p class="text-gray-500 text-sm mt-1">Example: "Our fleet has 100 vehicles."</p>
+                    </div>
+
+                    <div class="content-box mt-6">
+                        <p class="text-gray-700"><strong>Practice:</strong> Say each word 3 times out loud.</p>
+                    </div>
+                `,
+                narration: "Now let's learn fleet vocabulary. First: Van. This is a small delivery vehicle. Repeat: Van. Van. Van. Second: Lorry, or Truck. This is big, for heavy loads. Repeat: Lorry. Lorry. Lorry. Third: Fleet. This is all your vehicles together. Repeat: Fleet. Fleet. Fleet.",
+                hasImage: true,
+                imagePrompt: "Professional automotive photography, modern electric delivery van on left, large semi truck on right, clean white studio background, high quality"
+            },
+
+            // PAGE 4: HUB VOCABULARY
+            {
+                id: "vocab-hub",
+                title: "Vocabulary 2: The Hub (Your Warehouse)",
+                content: `
+                    <div class="section-header">
+                        <h2 class="text-2xl font-bold">Learn These 4 Warehouse Words</h2>
+                        <p class="text-sm mt-1 opacity-90">Listen and repeat each word</p>
+                    </div>
+
+                    <div class="vocab-card" onclick="this.classList.toggle('revealed')">
+                        <div class="font-bold text-2xl" style="color: #ff5a00;">FORKLIFT</div>
+                        <p class="text-gray-600 mt-2 text-lg">A machine to lift heavy things</p>
+                        <p class="text-gray-500 text-sm mt-1">Example: "Use the forklift to move pallets."</p>
+                    </div>
+
+                    <div class="vocab-card" onclick="this.classList.toggle('revealed')">
+                        <div class="font-bold text-2xl" style="color: #ff5a00;">PALLET</div>
+                        <p class="text-gray-600 mt-2 text-lg">A wooden platform for boxes</p>
+                        <p class="text-gray-500 text-sm mt-1">Example: "Put 50 boxes on each pallet."</p>
+                    </div>
+
+                    <div class="vocab-card" onclick="this.classList.toggle('revealed')">
+                        <div class="font-bold text-2xl" style="color: #ff5a00;">SCANNER</div>
+                        <p class="text-gray-600 mt-2 text-lg">A device to read barcodes</p>
+                        <p class="text-gray-500 text-sm mt-1">Example: "Scan the package with the scanner."</p>
+                    </div>
+
+                    <div class="vocab-card" onclick="this.classList.toggle('revealed')">
+                        <div class="font-bold text-2xl" style="color: #ff5a00;">CONVEYOR BELT</div>
+                        <p class="text-gray-600 mt-2 text-lg">A moving belt for packages</p>
+                        <p class="text-gray-500 text-sm mt-1">Example: "Packages move on the conveyor belt."</p>
+                    </div>
+                `,
+                narration: "Next, the hub vocabulary. First: Forklift. This machine lifts heavy things. Repeat: Forklift. Second: Pallet. This is a wooden platform for boxes. Repeat: Pallet. Third: Scanner. This reads barcodes. Repeat: Scanner. Fourth: Conveyor belt. This is a moving belt for packages. Repeat: Conveyor belt.",
+                hasImage: true,
+                imagePrompt: "Modern automated warehouse interior, yellow forklift prominent, stacked pallets, conveyor belt with packages, clean industrial photography, bright lighting"
+            },
+
+            // PAGE 5: STRUCTURE 1 - WE HAVE
+            {
+                id: "structure-we-have",
+                title: "Grammar Structure 1: 'We have...'",
+                content: `
+                    <div class="section-header">
+                        <h2 class="text-2xl font-bold">How to Describe Quantity</h2>
+                        <p class="text-sm mt-1 opacity-90">Use this structure to talk about what you have</p>
+                    </div>
+
+                    <div class="structure-box">
+                        We have + [NUMBER] + [VEHICLE/THING]
+                    </div>
+
+                    <div class="example-box">
+                        <strong>✓</strong> We have <strong>50</strong> vans.
+                    </div>
+
+                    <div class="example-box">
+                        <strong>✓</strong> We have <strong>15</strong> lorries.
+                    </div>
+
+                    <div class="example-box">
+                        <strong>✓</strong> We have <strong>100</strong> drivers.
+                    </div>
+
+                    <div class="example-box">
+                        <strong>✓</strong> We have <strong>20</strong> forklifts.
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="fleet-chart"></canvas>
+                    </div>
+
+                    <div class="content-box">
+                        <p class="font-semibold mb-3">Practice: Look at the chart above. Complete these sentences:</p>
+                        <div class="question-box">
+                            <p class="mb-2">1. We have _____ EV Vans.</p>
+                            <input type="text" class="input-field" placeholder="Type the number">
+                        </div>
+                        <div class="question-box">
+                            <p class="mb-2">2. We have _____ Lorries.</p>
+                            <input type="text" class="input-field" placeholder="Type the number">
+                        </div>
+                    </div>
+                `,
+                narration: "Now learn the grammar structure. To describe quantity, say: We have. Then say the number. Then say the vehicle. For example: We have fifty vans. We have fifteen lorries. We have one hundred drivers. Look at the chart. How many EV vans do you see? How many lorries? Practice the structure with the numbers from the chart.",
+                hasChart: true,
+                chartConfig: {
+                    type: 'bar',
+                    data: {
+                        labels: ['EV Vans', 'Diesel Vans', 'Lorries', 'Trailers'],
+                        datasets: [{
+                            label: 'Fleet Count',
+                            data: [45, 30, 15, 10],
+                            backgroundColor: ['#ff5a00', '#374151', '#1f2937', '#9ca3af'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Your Fleet Composition',
+                                font: { size: 18 }
+                            },
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { font: { size: 14 } }
+                            },
+                            x: {
+                                ticks: { font: { size: 14 } }
+                            }
+                        }
+                    }
+                },
+                hasImage: false
+            },
+
+            // PAGE 6: STRUCTURE 2 - I MANAGE
+            {
+                id: "structure-i-manage",
+                title: "Grammar Structure 2: 'I manage...'",
+                content: `
+                    <div class="section-header">
+                        <h2 class="text-2xl font-bold">How to Describe Responsibility</h2>
+                        <p class="text-sm mt-1 opacity-90">Use this structure to talk about your job</p>
+                    </div>
+
+                    <div class="structure-box">
+                        I manage + [NUMBER] + [THING]
+                    </div>
+
+                    <div class="example-box">
+                        <strong>✓</strong> I manage <strong>3</strong> hubs.
+                    </div>
+
+                    <div class="example-box">
+                        <strong>✓</strong> I manage <strong>40</strong> drivers.
+                    </div>
+
+                    <div class="example-box">
+                        <strong>✓</strong> I manage <strong>100</strong> workers.
+                    </div>
+
+                    <div class="example-box">
+                        <strong>✓</strong> I manage <strong>50</strong> vehicles.
+                    </div>
+
+                    <div class="content-box">
+                        <p class="font-semibold mb-3">Your Turn: Answer these questions about YOUR job:</p>
+                        <div class="question-box">
+                            <p class="mb-2">1. How many hubs do you manage?</p>
+                            <input type="text" class="input-field" placeholder="I manage ___ hubs.">
+                        </div>
+                        <div class="question-box">
+                            <p class="mb-2">2. How many drivers do you manage?</p>
+                            <input type="text" class="input-field" placeholder="I manage ___ drivers.">
+                        </div>
+                        <div class="question-box">
+                            <p class="mb-2">3. How many workers do you manage?</p>
+                            <input type="text" class="input-field" placeholder="I manage ___ workers.">
+                        </div>
+                    </div>
+                `,
+                narration: "Second structure. To describe responsibility, say: I manage. Then the number. Then the thing. For example: I manage three hubs. I manage forty drivers. I manage one hundred workers. Now you tell me: What do you manage? How many hubs? How many drivers? How many workers? Use the structure: I manage.",
+                hasImage: true,
+                imagePrompt: "Confident warehouse manager in safety vest, looking at digital dashboard screen, warehouse background slightly blurred, professional portrait"
+            },
+
+            // PAGE 7: LISTENING 1
+            {
+                id: "listening-1",
+                title: "Listening Exercise 1: What Do You Hear?",
+                content: `
+                    <div class="section-header">
+                        <h2 class="text-2xl font-bold">Listening Task 1</h2>
+                        <p class="text-sm mt-1 opacity-90">Listen to the audio. Choose the correct answer.</p>
+                    </div>
+
+                    <div class="content-box">
+                        <p class="text-lg font-semibold mb-3">Question: What does the manager have?</p>
+                        <button class="btn-audio" onclick="playCurrentPageAudio()">🔊 Play Audio</button>
+                    </div>
+
+                    <div id="listening-1-options">
+                        <div class="option-box" data-answer="wrong" onclick="checkListening1(this)">
+                            <strong>A)</strong> We have 15 vans and 50 lorries.
+                        </div>
+                        <div class="option-box" data-answer="correct" onclick="checkListening1(this)">
+                            <strong>B)</strong> We have 50 vans and 15 lorries.
+                        </div>
+                        <div class="option-box" data-answer="wrong" onclick="checkListening1(this)">
+                            <strong>C)</strong> We have 50 vans and 50 lorries.
+                        </div>
+                    </div>
+
+                    <div id="listening-1-feedback" class="feedback-box">
+                        <p class="text-lg"><strong style="color: #10b981;">✓ Correct!</strong></p>
+                        <p class="mt-2">The manager says: "We have 50 vans and 15 lorries."</p>
+                    </div>
+                `,
+                narration: "Good morning. This is my fleet report. We have fifty vans and fifteen lorries. The vans are new. The lorries are old but good. That's all for now. Thank you.",
+                hasImage: true,
+                imagePrompt: "Abstract sound wave visualization, orange and gray colors, modern audio interface aesthetic, dark background"
+            },
+
+            // PAGE 8: LISTENING 2
+            {
+                id: "listening-2",
+                title: "Listening Exercise 2: How Many Hubs?",
+                content: `
+                    <div class="section-header">
+                        <h2 class="text-2xl font-bold">Listening Task 2</h2>
+                        <p class="text-sm mt-1 opacity-90">Listen to the audio. Choose the correct answer.</p>
+                    </div>
+
+                    <div class="content-box">
+                        <p class="text-lg font-semibold mb-3">Question: How many hubs does the manager manage?</p>
+                        <button class="btn-audio" onclick="playCurrentPageAudio()">🔊 Play Audio</button>
+                    </div>
+
+                    <div id="listening-2-options">
+                        <div class="option-box" data-answer="wrong" onclick="checkListening2(this)">
+                            <strong>A)</strong> 2 hubs
+                        </div>
+                        <div class="option-box" data-answer="correct" onclick="checkListening2(this)">
+                            <strong>B)</strong> 3 hubs
+                        </div>
+                        <div class="option-box" data-answer="wrong" onclick="checkListening2(this)">
+                            <strong>C)</strong> 4 hubs
+                        </div>
+                    </div>
+
+                    <div id="listening-2-feedback" class="feedback-box">
+                        <p class="text-lg"><strong style="color: #10b981;">✓ Correct!</strong></p>
+                        <p class="mt-2">He says: "I manage 3 hubs in the north."</p>
+                    </div>
+                `,
+                narration: "Hello everyone. My name is Tomasz. I manage three hubs in the north. Each hub has fifty workers. We have good forklifts and new scanners. The capacity is good this month. Thank you for listening.",
+                hasImage: true,
+                imagePrompt: "Map of Poland with 3 warehouse icons in the north highlighted, modern infographic style, orange accent colors"
+            },
+
+            // PAGE 9: READING
+            {
+                id: "reading",
+                title: "Reading Exercise: Meet Manager Piotr",
+                content: `
+                    <div class="section-header">
+                        <h2 class="text-2xl font-bold">Reading: Piotr's Day at Work</h2>
+                        <p class="text-sm mt-1 opacity-90">Read the text carefully. Then answer the questions.</p>
+                    </div>
+
+                    <div class="reading-passage">
+                        <h3 class="text-xl font-bold mb-4" style="color: #ff5a00;">Piotr's Day at Work</h3>
+                        <p class="mb-4">
+                            My name is <strong>Piotr</strong>. I am a warehouse manager. I manage <strong>3 hubs</strong> in central Poland.
+                        </p>
+                        <p class="mb-4">
+                            We have a big fleet. We have <strong>60 vans</strong> and <strong>20 lorries</strong>. The vans are new and clean.
+                            The lorries are old but good.
+                        </p>
+                        <p class="mb-4">
+                            Inside the hubs, we have <strong>15 forklifts</strong> and many pallets. We use scanners every day.
+                            The capacity is <strong>good</strong> this month.
+                        </p>
+                        <p>
+                            I drive to the hubs every week for inspections. Today is busy!
+                        </p>
+                    </div>
+
+                    <div class="content-box">
+                        <p class="font-semibold mb-4 text-lg">Answer these questions:</p>
+
+                        <div class="question-box">
+                            <p class="font-semibold mb-2">Q1: How many hubs does Piotr manage?</p>
+                            <input type="text" class="input-field" id="read-q1" placeholder="Type your answer">
+                        </div>
+
+                        <div class="question-box">
+                            <p class="font-semibold mb-2">Q2: How many vans does he have?</p>
+                            <input type="text" class="input-field" id="read-q2" placeholder="Type your answer">
+                        </div>
+
+                        <div class="question-box">
+                            <p class="font-semibold mb-2">Q3: Are the vans new or old?</p>
+                            <input type="text" class="input-field" id="read-q3" placeholder="Type your answer">
+                        </div>
+
+                        <div class="question-box">
+                            <p class="font-semibold mb-2">Q4: How many forklifts are in the hubs?</p>
+                            <input type="text" class="input-field" id="read-q4" placeholder="Type your answer">
+                        </div>
+
+                        <button class="btn-primary mt-4" onclick="checkReading()">Check My Answers</button>
+
+                        <div id="reading-feedback" class="feedback-box">
+                            <p class="font-bold text-lg mb-2" style="color: #10b981;">Correct Answers:</p>
+                            <p><strong>Q1:</strong> 3 hubs</p>
+                            <p><strong>Q2:</strong> 60 vans</p>
+                            <p><strong>Q3:</strong> New (and clean)</p>
+                            <p><strong>Q4:</strong> 15 forklifts</p>
+                        </div>
+                    </div>
+                `,
+                narration: "Now let's read about Piotr. He is a warehouse manager like you. Read the text carefully. Take your time. Then answer the four questions below. When you are ready, click check my answers.",
+                hasImage: true,
+                imagePrompt: "Professional warehouse manager reading a report on tablet, modern hub office setting, bright lighting"
+            },
+
+            // PAGE 10: PRACTICE 1 - GAP FILL
+            {
+                id: "practice-gap-fill",
+                title: "Practice Exercise 1: Fill the Gaps",
+                content: `
+                    <div class="section-header">
+                        <h2 class="text-2xl font-bold">Practice 1: Complete the Sentences</h2>
+                        <p class="text-sm mt-1 opacity-90">Fill in the missing words</p>
+                    </div>
+
+                    <div class="content-box">
+                        <p class="mb-4">Use these words: <strong>have, manage, fleet, forklift, good</strong></p>
+
+                        <div class="question-box">
+                            <p class="mb-2">1. We <input type="text" style="display: inline; width: 150px;" class="input-field" id="gap-1" placeholder="?"> 50 vans.</p>
+                        </div>
+
+                        <div class="question-box">
+                            <p class="mb-2">2. I <input type="text" style="display: inline; width: 150px;" class="input-field" id="gap-2" placeholder="?"> 3 hubs.</p>
+                        </div>
+
+                        <div class="question-box">
+                            <p class="mb-2">3. The <input type="text" style="display: inline; width: 150px;" class="input-field" id="gap-3" placeholder="?"> is big.</p>
+                        </div>
+
+                        <div class="question-box">
+                            <p class="mb-2">4. We use the <input type="text" style="display: inline; width: 150px;" class="input-field" id="gap-4" placeholder="?"> to move pallets.</p>
+                        </div>
+
+                        <div class="question-box">
+                            <p class="mb-2">5. The capacity is <input type="text" style="display: inline; width: 150px;" class="input-field" id="gap-5" placeholder="?"> this month.</p>
+                        </div>
+
+                        <button class="btn-primary mt-4" onclick="checkGapFill()">Check My Answers</button>
+
+                        <div id="gap-feedback" class="feedback-box">
+                            <p class="font-bold text-lg mb-2" style="color: #10b981;">Correct Answers:</p>
+                            <p>1. <strong>have</strong> | 2. <strong>manage</strong> | 3. <strong>fleet</strong> | 4. <strong>forklift</strong> | 5. <strong>good</strong></p>
+                        </div>
+                    </div>
+                `,
+                narration: "Now practice. Fill in the gaps with the correct words. Use the vocabulary from today: have, manage, fleet, forklift, good. Type your answers in each box. When you finish, click check my answers.",
+                hasImage: true,
+                imagePrompt: "Modern warehouse office desk with laptop and documents, pen in hand, professional workspace"
+            },
+
+            // PAGE 11: PRACTICE 2 - WORD ORDER
+            {
+                id: "practice-ordering",
+                title: "Practice Exercise 2: Put Words in Order",
+                content: `
+                    <div class="section-header">
+                        <h2 class="text-2xl font-bold">Practice 2: Make Correct Sentences</h2>
+                        <p class="text-sm mt-1 opacity-90">Arrange the words to make sentences</p>
+                    </div>
+
+                    <div class="content-box">
+                        <div class="question-box">
+                            <p class="font-semibold mb-2">1. Words: [ have / We / 50 / vans ]</p>
+                            <input type="text" class="input-field" id="order-1" placeholder="Type the correct sentence">
+                        </div>
+
+                        <div class="question-box">
+                            <p class="font-semibold mb-2">2. Words: [ manage / I / 3 / hubs ]</p>
+                            <input type="text" class="input-field" id="order-2" placeholder="Type the correct sentence">
+                        </div>
+
+                        <div class="question-box">
+                            <p class="font-semibold mb-2">3. Words: [ good / The / is / capacity ]</p>
+                            <input type="text" class="input-field" id="order-3" placeholder="Type the correct sentence">
+                        </div>
+
+                        <div class="question-box">
+                            <p class="font-semibold mb-2">4. Words: [ new / vans / The / are ]</p>
+                            <input type="text" class="input-field" id="order-4" placeholder="Type the correct sentence">
+                        </div>
+
+                        <button class="btn-primary mt-4" onclick="checkOrdering()">Check My Sentences</button>
+
+                        <div id="order-feedback" class="feedback-box">
+                            <p class="font-bold text-lg mb-2" style="color: #10b981;">Correct Sentences:</p>
+                            <p>1. We have 50 vans.</p>
+                            <p>2. I manage 3 hubs.</p>
+                            <p>3. The capacity is good.</p>
+                            <p>4. The vans are new.</p>
+                        </div>
+                    </div>
+                `,
+                narration: "Next exercise. Put the words in the correct order. Make sentences. Remember: subject first, then verb, then number, then noun. Type your sentences in each box. When you finish, check your answers.",
+                hasImage: true,
+                imagePrompt: "Scattered word cards on a desk, puzzle pieces concept, organized thinking visual metaphor, clean business aesthetic"
+            },
+
+            // PAGE 12: SEMI-CONTROLLED PRACTICE
+            {
+                id: "semi-controlled",
+                title: "Practice Exercise 3: Complete the Dialogue",
+                content: `
+                    <div class="section-header">
+                        <h2 class="text-2xl font-bold">Practice 3: Your Information</h2>
+                        <p class="text-sm mt-1 opacity-90">Complete this conversation with YOUR real information</p>
+                    </div>
+
+                    <div class="content-box">
+                        <div class="question-box">
+                            <p class="font-semibold mb-2" style="color: #10b981;">Regional Manager: How many hubs do you manage?</p>
+                            <input type="text" class="input-field" placeholder="You: I manage ___ hubs.">
+                        </div>
+
+                        <div class="question-box">
+                            <p class="font-semibold mb-2" style="color: #10b981;">Regional Manager: And the fleet? How big?</p>
+                            <input type="text" class="input-field" placeholder="You: We have ___ vans and ___ lorries.">
+                        </div>
+
+                        <div class="question-box">
+                            <p class="font-semibold mb-2" style="color: #10b981;">Regional Manager: Are they new or old?</p>
+                            <input type="text" class="input-field" placeholder="You: The vans are ___. The lorries are ___.">
+                        </div>
+
+                        <div class="question-box">
+                            <p class="font-semibold mb-2" style="color: #10b981;">Regional Manager: What about capacity?</p>
+                            <input type="text" class="input-field" placeholder="You: The capacity is ___ this month.">
+                        </div>
+
+                        <div class="question-box">
+                            <p class="font-semibold mb-2" style="color: #10b981;">Regional Manager: How often do you visit the hubs?</p>
+                            <input type="text" class="input-field" placeholder="You: I drive to the hubs every ___.">
+                        </div>
+                    </div>
+                `,
+                narration: "Now practice a dialogue. I will be the regional manager. I ask questions. You answer using the structures we learned. Use real information about your work, or imagine it. Question one: How many hubs do you manage? Question two: And the fleet? How big? Question three: Are they new or old? Question four: What about capacity? Question five: How often do you visit the hubs?",
+                hasImage: true,
+                imagePrompt: "Two business professionals having a video conference call, split screen view, professional setting, modern office backgrounds"
+            },
+
+            // PAGE 13: FREE PRODUCTION PREP
+            {
+                id: "production-prep",
+                title: "Final Task: Prepare Your Report",
+                content: `
+                    <div class="section-header">
+                        <h2 class="text-2xl font-bold">Final Task: Your Asset Report</h2>
+                        <p class="text-sm mt-1 opacity-90">Prepare a 60-second status report about YOUR operation</p>
+                    </div>
+
+                    <div class="content-box" style="background: #eff6ff; border: 2px solid #3b82f6;">
+                        <h3 class="text-xl font-bold mb-3">Report Structure (Follow This!):</h3>
+
+                        <div style="background: white; padding: 1rem; margin: 0.5rem 0; border-radius: 0.375rem;">
+                            <strong>1. Start →</strong> "Basically..." or "Good morning..."
+                        </div>
+
+                        <div style="background: white; padding: 1rem; margin: 0.5rem 0; border-radius: 0.375rem;">
+                            <strong>2. Introduce →</strong> "I manage [X] hubs in [place]."
+                        </div>
+
+                        <div style="background: white; padding: 1rem; margin: 0.5rem 0; border-radius: 0.375rem;">
+                            <strong>3. Fleet →</strong> "We have [X] vans and [X] lorries."
+                        </div>
+
+                        <div style="background: white; padding: 1rem; margin: 0.5rem 0; border-radius: 0.375rem;">
+                            <strong>4. Quality →</strong> "The vans are [new/old]. The lorries are [new/old]."
+                        </div>
+
+                        <div style="background: white; padding: 1rem; margin: 0.5rem 0; border-radius: 0.375rem;">
+                            <strong>5. Equipment →</strong> "We have [X] forklifts and many pallets."
+                        </div>
+
+                        <div style="background: white; padding: 1rem; margin: 0.5rem 0; border-radius: 0.375rem;">
+                            <strong>6. Status →</strong> "The capacity is [good/bad] this month."
+                        </div>
+
+                        <div style="background: white; padding: 1rem; margin: 0.5rem 0; border-radius: 0.375rem;">
+                            <strong>7. Extra →</strong> "I drive to the hubs every [day/week]."
+                        </div>
+                    </div>
+
+                    <div class="content-box mt-4">
+                        <p class="font-semibold mb-2">Write your notes here:</p>
+                        <textarea class="input-field" rows="8" placeholder="Make notes for your report..."></textarea>
+                    </div>
+                `,
+                narration: "Now the final task. You will give a sixty-second asset report. Use all the structures from today. Look at the report structure on screen. Take two minutes to prepare. Make notes if you need. Write what you will say in the box. Then you will speak on the next page.",
+                hasImage: true,
+                imagePrompt: "Professional preparing for presentation, looking at notes, conference room setting, confident posture"
+            },
+
+            // PAGE 14: FREE PRODUCTION PERFORM
+            {
+                id: "production-perform",
+                title: "Final Task: Give Your Report",
+                content: `
+                    <div class="section-header">
+                        <h2 class="text-2xl font-bold">Now YOU Speak!</h2>
+                        <p class="text-sm mt-1 opacity-90">Give your asset report now (60 seconds)</p>
+                    </div>
+
+                    <div class="content-box text-center" style="padding: 3rem;">
+                        <p class="text-3xl font-bold mb-4" style="color: #ff5a00;">
+                            Give Your Asset Report Now!
+                        </p>
+                        <p class="text-xl mb-6">
+                            Remember to use:<br>
+                            "I manage...", "We have...", "The capacity is..."
+                        </p>
+
+                        <div class="timer-badge" style="font-size: 2rem;" id="production-timer">1:00</div>
+
+                        <button class="btn-primary" style="font-size: 1.2rem; padding: 1rem 3rem; margin-top: 2rem;" onclick="startProductionTimer()">
+                            ⏱️ Start Timer
+                        </button>
+                    </div>
+                `,
+                narration: "Your turn now. Give your asset report. I will listen. Try to speak for sixty seconds. Use the structures we practiced. Click start timer when you are ready. Good luck!",
+                hasImage: true,
+                imagePrompt: "Professional speaking confidently on video call, microphone visible, blurred office background, spotlight effect"
+            },
+
+            // PAGE 15: EXPANSION (OPTIONAL)
+            {
+                id: "expansion",
+                title: "Extension: Add Negatives (Optional)",
+                content: `
+                    <div class="section-header">
+                        <h2 class="text-2xl font-bold">Extension: How to Say What You DON'T Have</h2>
+                        <p class="text-sm mt-1 opacity-90">Advanced structure for stronger students</p>
+                    </div>
+
+                    <div class="structure-box" style="background: #f5f3ff; border-color: #9333ea;">
+                        We DON'T have + [THING]
+                    </div>
+
+                    <div class="example-box">
+                        <strong>✓</strong> We <strong style="color: #ef4444;">don't have</strong> airplanes.
+                    </div>
+
+                    <div class="example-box">
+                        <strong>✓</strong> We <strong style="color: #ef4444;">don't have</strong> trains.
+                    </div>
+
+                    <div class="example-box">
+                        <strong>✓</strong> We <strong style="color: #ef4444;">don't have</strong> boats.
+                    </div>
+
+                    <div class="example-box">
+                        <strong>✓</strong> We <strong style="color: #ef4444;">don't have</strong> helicopters.
+                    </div>
+
+                    <div class="content-box">
+                        <p class="font-semibold mb-3">Practice: Write 3 sentences about what you DON'T have:</p>
+                        <div class="question-box">
+                            <p class="mb-2">1. We don't have ___________.</p>
+                            <input type="text" class="input-field">
+                        </div>
+                        <div class="question-box">
+                            <p class="mb-2">2. We don't have ___________.</p>
+                            <input type="text" class="input-field">
+                        </div>
+                        <div class="question-box">
+                            <p class="mb-2">3. We don't have ___________.</p>
+                            <input type="text" class="input-field">
+                        </div>
+                    </div>
+                `,
+                narration: "If you finished early, let's add depth. We can also say what we don't have. Use 'don't have' for negatives. For example: We don't have airplanes. We don't have trains. We don't have boats. Now you tell me: What don't you have in your operation? Write three sentences.",
+                hasImage: true,
+                imagePrompt: "Split screen comparison, left side shows delivery vehicles, right side shows crossed out airplane and train, visual metaphor for negation"
+            },
+
+            // PAGE 16: SUMMARY & HOMEWORK
+            {
+                id: "summary",
+                title: "Lesson Summary & Homework",
+                content: `
+                    <div class="section-header">
+                        <h2 class="text-2xl font-bold">Great Work Today! 🎉</h2>
+                        <p class="text-sm mt-1 opacity-90">Review what you learned and complete your homework</p>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="content-box" style="background: #fff7ed; border-color: #ff5a00;">
+                            <h3 class="text-xl font-bold mb-3" style="color: #ff5a00;">📚 What We Learned Today:</h3>
+                            <ul style="line-height: 2.5;">
+                                <li>✓ Fleet vocabulary (van, lorry, fleet)</li>
+                                <li>✓ Hub vocabulary (forklift, pallet, scanner, conveyor belt)</li>
+                                <li>✓ Grammar: "We have..."</li>
+                                <li>✓ Grammar: "I manage..."</li>
+                                <li>✓ How to give asset reports</li>
+                                <li>✓ Listening and reading skills</li>
+                            </ul>
+                        </div>
+
+                        <div class="content-box" style="background: #f0fdf4; border-color: #10b981;">
+                            <h3 class="text-xl font-bold mb-3" style="color: #10b981;">✍️ Your Homework:</h3>
+                            <ul style="line-height: 2.5;">
+                                <li>1. Write 5 sentences using "We have..."</li>
+                                <li>2. Write 3 sentences using "I manage..."</li>
+                                <li>3. Practice your asset report 3x at home</li>
+                                <li>4. Review all vocabulary from pages 3-4</li>
+                                <li>5. Prepare questions for next lesson</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="content-box mt-6" style="background: #f5f3ff; border: 2px solid #9333ea; text-align: center;">
+                        <p class="text-xl">
+                            <strong>Next Lesson Preview:</strong><br>
+                            Module 2: Operations & Daily Routines
+                        </p>
+                        <p class="mt-2 text-gray-600">We will learn about daily tasks, schedules, and problem-solving.</p>
+                    </div>
+
+                    <div class="word-building-table mt-6">
+                        <thead>
+                            <tr>
+                                <th>Verb</th>
+                                <th>Noun (thing)</th>
+                                <th>Noun (person)</th>
+                                <th>Adjective</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>manage</td>
+                                <td><input type="text" placeholder="management"></td>
+                                <td><input type="text" placeholder="manager"></td>
+                                <td><input type="text" placeholder="manageable"></td>
+                            </tr>
+                            <tr>
+                                <td>operate</td>
+                                <td><input type="text" placeholder="operation"></td>
+                                <td><input type="text" placeholder="operator"></td>
+                                <td><input type="text" placeholder="operational"></td>
+                            </tr>
+                            <tr>
+                                <td>deliver</td>
+                                <td><input type="text" placeholder="delivery"></td>
+                                <td><input type="text" placeholder="driver"></td>
+                                <td><input type="text" placeholder="delivered"></td>
+                            </tr>
+                        </tbody>
+                    </div>
+                `,
+                narration: "Excellent work today! You learned fleet and hub vocabulary. You learned two important structures: We have, and I manage. You practiced listening, reading, and speaking. For homework, write sentences using the structures. Practice your asset report at home three times. Review all vocabulary. Next lesson we will learn about daily operations and routines. See you next time!",
+                hasImage: true,
+                imagePrompt: "Celebration concept, successful business meeting conclusion, handshake, modern office, positive atmosphere"
+            }
+        ]
+    };
+
+    // ============================================
+    // FIREBASE & STORAGE (FIXED VERSION)
+    // ============================================
+
+    const APP_ID = "allegro-worksheet-v2";
+
+    let app, db, auth, userId;
+    let currentPageIndex = 0;
+    let generatedPages = [];
+    let shouldForceRegenerate = false;
+    let productionTimerInterval = null;
+
+    const elements = {
+        progressScreen: document.getElementById('progress-screen'),
+        progressLog: document.getElementById('progress-log'),
+        progressBar: document.getElementById('progress-bar'),
+        worksheetContainer: document.getElementById('worksheet-container'),
+        pagesContainer: document.getElementById('pages-container'),
+        prevBtn: document.getElementById('prev-btn'),
+        nextBtn: document.getElementById('next-btn'),
+        audioBtn: document.getElementById('audio-btn'),
+        pageCounter: document.getElementById('page-counter')
+    };
+
+    const log = (msg, type = 'info') => {
+        const colors = { success: 'text-green-400', error: 'text-red-400', info: 'text-blue-400', warning: 'text-yellow-400' };
+        elements.progressLog.innerHTML += `<div class="${colors[type]}">[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+        elements.progressLog.scrollTop = elements.progressLog.scrollHeight;
+    };
+
+    async function initFirebase() {
+        try {
+            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+
+            await new Promise((resolve) => {
+                const unsubscribe = onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        resolve();
+                        unsubscribe();
+                    }
+                });
+            });
+
+            log(`✓ Connected (User: ${userId.substring(0, 8)}...)`, "success");
+        } catch (error) {
+            log(`⚠ Firebase error: ${error.message}`, "warning");
+        }
+    }
+
+    // ============================================
+    // AUDIO CONVERSION (CRITICAL!)
+    // ============================================
+
+    const base64ToArrayBuffer = (base64) => {
+        const binaryString = window.atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return bytes.buffer;
+    };
+
+    const pcmToWav = (pcmData, sampleRate = 24000) => {
+        const numChannels = 1;
+        const bitsPerSample = 16;
+        const byteRate = sampleRate * numChannels * (bitsPerSample / 8);
+        const blockAlign = numChannels * (bitsPerSample / 8);
+        const dataSize = pcmData.length * pcmData.BYTES_PER_ELEMENT;
+        const buffer = new ArrayBuffer(44 + dataSize);
+        const view = new DataView(buffer);
+
+        view.setUint32(0, 0x52494646, false);
+        view.setUint32(4, 36 + dataSize, true);
+        view.setUint32(8, 0x57415645, false);
+        view.setUint32(12, 0x666d7420, false);
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true);
+        view.setUint16(22, numChannels, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, byteRate, true);
+        view.setUint16(32, blockAlign, true);
+        view.setUint16(34, bitsPerSample, true);
+        view.setUint32(36, 0x64617461, false);
+        view.setUint32(40, dataSize, true);
+
+        const pcm16 = new Int16Array(pcmData.buffer);
+        for (let i = 0; i < pcm16.length; i++) {
+            view.setInt16(44 + i * 2, pcm16[i], true);
+        }
+
+        return new Blob([view], { type: 'audio/wav' });
+    };
+
+    // ============================================
+    // CHUNKED STORAGE
+    // ============================================
+
+    async function saveAssetToFirestore(assetName, mimeType, base64data) {
+        if (!userId) throw new Error("User ID not available");
+
+        const MAX_CHUNK_SIZE = 900 * 1024;
+        const chunks = [];
+
+        for (let i = 0; i < base64data.length; i += MAX_CHUNK_SIZE) {
+            chunks.push(base64data.substring(i, i + MAX_CHUNK_SIZE));
+        }
+
+        const assetMetaRef = doc(db, 'artifacts', APP_ID, 'users', userId, 'worksheet_assets', assetName);
+        await setDoc(assetMetaRef, {
+            mimeType,
+            chunkCount: chunks.length,
+            createdAt: Date.now()
+        });
+
+        const chunkPromises = chunks.map((chunkData, index) => {
+            const chunkRef = doc(db, 'artifacts', APP_ID, 'users', userId, 'worksheet_assets', assetName, 'chunks', String(index));
+            return setDoc(chunkRef, { data: chunkData });
+        });
+
+        await Promise.all(chunkPromises);
+
+        const sizeKB = Math.round(base64data.length * 0.75 / 1024);
+        log(`✓ Saved ${assetName} (${chunks.length} chunks, ~${sizeKB}KB)`, 'success');
+    }
+
+    async function getAssetFromFirestore(assetName) {
+        if (!userId || shouldForceRegenerate) return null;
+
+        try {
+            const assetMetaRef = doc(db, 'artifacts', APP_ID, 'users', userId, 'worksheet_assets', assetName);
+            const metaDocSnap = await getDoc(assetMetaRef);
+
+            if (!metaDocSnap.exists()) return null;
+
+            const { mimeType, chunkCount } = metaDocSnap.data();
+
+            const chunkPromises = [];
+            for (let i = 0; i < chunkCount; i++) {
+                const chunkRef = doc(db, 'artifacts', APP_ID, 'users', userId, 'worksheet_assets', assetName, 'chunks', String(i));
+                chunkPromises.push(getDoc(chunkRef));
+            }
+
+            const chunkDocs = await Promise.all(chunkPromises);
+            let base64data = '';
+
+            for (const chunkDoc of chunkDocs) {
+                if (chunkDoc.exists()) {
+                    base64data += chunkDoc.data().data;
+                } else {
+                    return null;
+                }
+            }
+
+            return { base64data, mimeType };
+
+        } catch (error) {
+            log(`⚠ Error loading ${assetName}: ${error.message}`, 'warning');
+            return null;
+        }
+    }
+
+    // ============================================
+    // IMAGE COMPRESSION
+    // ============================================
+
+    function compressImage(base64Data, quality = 0.6) {
+        return new Promise((resolve) => {
+            const canvas = document.getElementById('compression-canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+
+            img.onload = () => {
+                let width = img.width;
+                let height = img.height;
+                const maxWidth = 1920;
+                const maxHeight = 1080;
+
+                if (width > maxWidth || height > maxHeight) {
+                    const ratio = Math.min(maxWidth / width, maxHeight / height);
+                    width = width * ratio;
+                    height = height * ratio;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const compressed = canvas.toDataURL('image/jpeg', quality);
+                resolve(compressed.split(',')[1]);
+            };
+
+            const dataUri = base64Data.startsWith('data:')
+                ? base64Data
+                : `data:image/png;base64,${base64Data}`;
+            img.src = dataUri;
+        });
+    }
+
+    // ============================================
+    // API CALLS
+    // ============================================
+
+    const callWithRetry = async (apiCall, maxRetries = 3, initialDelay = 2000) => {
+        let delay = initialDelay;
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                return await apiCall();
+            } catch (error) {
+                if (attempt === maxRetries) throw error;
+                log(`Retry ${attempt}/${maxRetries}...`, 'warning');
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay *= 2;
+            }
+        }
+    };
+
+    const generateImage = async (prompt) => {
+        return callWithRetry(async () => {
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    instances: [{ prompt: prompt }],
+                    parameters: { sampleCount: 1, aspectRatio: "16:9" }
+                })
+            });
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const result = await response.json();
+
+            if (result.predictions?.[0]?.bytesBase64Encoded) {
+                return result.predictions[0].bytesBase64Encoded;
+            }
+            throw new Error("Invalid image data");
+        });
+    };
+
+    const generateTTS = async (text) => {
+        return callWithRetry(async () => {
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text }] }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: { voiceName: "Fenrir" }
+                            }
+                        }
+                    }
+                })
+            });
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const result = await response.json();
+            const part = result?.candidates?.[0]?.content?.parts?.[0];
+
+            if (part?.inlineData?.data) {
+                return part.inlineData.data;
+            }
+            throw new Error("Invalid audio data");
+        });
+    };
+
+    // ============================================
+    // ASSET LOADING
+    // ============================================
+
+    const loadAssets = async (page, index) => {
+        const assets = { image: null, audio: null };
+
+        // Load Image
+        if (page.hasImage) {
+            const imageId = `page_${index}_img`;
+            let imageData = await getAssetFromFirestore(imageId);
+
+            if (!imageData) {
+                log(`Generating image for page ${index + 1}...`);
+                const rawBase64 = await generateImage(page.imagePrompt);
+                if (rawBase64) {
+                    const compressedBase64 = await compressImage(rawBase64, 0.6);
+                    await saveAssetToFirestore(imageId, 'image/jpeg', compressedBase64);
+                    imageData = { base64data: compressedBase64, mimeType: 'image/jpeg' };
+                }
+            }
+
+            if (imageData) {
+                assets.image = `data:${imageData.mimeType};base64,${imageData.base64data}`;
+            }
+        }
+
+        // Load Audio
+        if (page.narration) {
+            const audioId = `page_${index}_audio`;
+            let audioData = await getAssetFromFirestore(audioId);
+
+            if (!audioData) {
+                log(`Generating audio for page ${index + 1}...`);
+                const pcmBase64 = await generateTTS(page.narration);
+
+                if (pcmBase64) {
+                    const pcmArray = new Int16Array(base64ToArrayBuffer(pcmBase64));
+                    const wavBlob = pcmToWav(pcmArray, 24000);
+
+                    const wavBase64 = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                            const dataUrl = reader.result;
+                            resolve(dataUrl.split(',')[1]);
+                        };
+                        reader.readAsDataURL(wavBlob);
+                    });
+
+                    await saveAssetToFirestore(audioId, 'audio/wav', wavBase64);
+                    audioData = { base64data: wavBase64, mimeType: 'audio/wav' };
+                }
+            }
+
+            if (audioData) {
+                const audioBlob = await (await fetch(`data:${audioData.mimeType};base64,${audioData.base64data}`)).blob();
+                assets.audio = URL.createObjectURL(audioBlob);
+            }
+        }
+
+        return assets;
+    };
+
+    // ============================================
+    // PAGE BUILDING
+    // ============================================
+
+    const buildPage = (page, index, assets) => {
+        let imageHTML = '';
+        if (assets.image) {
+            imageHTML = `<div class="image-container"><img src="${assets.image}" alt="Page ${index + 1}"></div>`;
+        }
+
+        let chartHTML = '';
+        if (page.hasChart) {
+            chartHTML = `<div class="chart-container"><canvas id="chart-${index}" style="height: 300px;"></canvas></div>`;
+        }
+
+        return `
+            <div class="worksheet-page ${index === 0 ? 'active' : ''}" id="page-${index}">
+                ${imageHTML}
+                ${page.content}
+                ${chartHTML}
+            </div>
+        `;
+    };
+
+    // ============================================
+    // INTERACTIVE FUNCTIONS
+    // ============================================
+
+    window.playCurrentPageAudio = () => {
+        if (generatedPages[currentPageIndex] && generatedPages[currentPageIndex].assets.audio) {
+            const audio = new Audio(generatedPages[currentPageIndex].assets.audio);
+            audio.play();
+        }
+    };
+
+    window.checkListening1 = function(element) {
+        document.querySelectorAll('#listening-1-options .option-box').forEach(el => {
+            el.classList.remove('selected', 'correct', 'incorrect');
+            el.style.pointerEvents = 'none';
+        });
+        element.classList.add('selected');
+        if (element.dataset.answer === 'correct') {
+            element.classList.add('correct');
+            document.getElementById('listening-1-feedback').classList.add('show');
+        } else {
+            element.classList.add('incorrect');
+        }
+    };
+
+    window.checkListening2 = function(element) {
+        document.querySelectorAll('#listening-2-options .option-box').forEach(el => {
+            el.classList.remove('selected', 'correct', 'incorrect');
+            el.style.pointerEvents = 'none';
+        });
+        element.classList.add('selected');
+        if (element.dataset.answer === 'correct') {
+            element.classList.add('correct');
+            document.getElementById('listening-2-feedback').classList.add('show');
+        } else {
+            element.classList.add('incorrect');
+        }
+    };
+
+    window.checkReading = function() {
+        document.getElementById('reading-feedback').classList.add('show');
+    };
+
+    window.checkGapFill = function() {
+        document.getElementById('gap-feedback').classList.add('show');
+    };
+
+    window.checkOrdering = function() {
+        document.getElementById('order-feedback').classList.add('show');
+    };
+
+    window.startProductionTimer = function() {
+        let seconds = 60;
+        const timerEl = document.getElementById('production-timer');
+        if (productionTimerInterval) clearInterval(productionTimerInterval);
+
+        productionTimerInterval = setInterval(() => {
+            seconds--;
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            timerEl.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+
+            if (seconds <= 0) {
+                clearInterval(productionTimerInterval);
+                timerEl.textContent = "Time's up!";
+                timerEl.style.background = '#ef4444';
+            }
+        }, 1000);
+    };
+
+    // ============================================
+    // NAVIGATION
+    // ============================================
+
+    const updatePageCounter = () => {
+        elements.pageCounter.textContent = `${currentPageIndex + 1} / ${generatedPages.length}`;
+    };
+
+    const goToPage = (index) => {
+        if (index < 0 || index >= generatedPages.length) return;
+        document.querySelectorAll('.worksheet-page')[currentPageIndex].classList.remove('active');
+        currentPageIndex = index;
+        document.querySelectorAll('.worksheet-page')[currentPageIndex].classList.add('active');
+        updatePageCounter();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    elements.nextBtn.onclick = () => {
+        if (currentPageIndex < generatedPages.length - 1) {
+            goToPage(currentPageIndex + 1);
+        }
+    };
+
+    elements.prevBtn.onclick = () => {
+        if (currentPageIndex > 0) {
+            goToPage(currentPageIndex - 1);
+        }
+    };
+
+    elements.audioBtn.onclick = () => playCurrentPageAudio();
+
+    // ============================================
+    // MAIN INITIALIZATION
+    // ============================================
+
+    const run = async () => {
+        await initFirebase();
+        log("Loading worksheet...");
+
+        for (let i = 0; i < WORKSHEET_DATA.pages.length; i++) {
+            const page = WORKSHEET_DATA.pages[i];
+            try {
+                const assets = await loadAssets(page, i);
+                generatedPages.push({ ...page, assets });
+                log(`✓ Page ${i + 1}/${WORKSHEET_DATA.pages.length} ready`, 'success');
+            } catch (e) {
+                log(`✗ Error on page ${i + 1}: ${e.message}`, 'error');
+                generatedPages.push({ ...page, assets: { image: null, audio: null } });
+            }
+            elements.progressBar.style.width = `${((i + 1) / WORKSHEET_DATA.pages.length) * 100}%`;
+        }
+
+        elements.pagesContainer.innerHTML = generatedPages.map((p, i) => buildPage(p, i, p.assets)).join('');
+
+        // Initialize charts
+        WORKSHEET_DATA.pages.forEach((p, i) => {
+            if (p.hasChart && p.chartConfig) {
+                new Chart(document.getElementById(`chart-${i}`), p.chartConfig);
+            }
+        });
+
+        elements.progressScreen.classList.add('hidden');
+        elements.worksheetContainer.classList.remove('hidden');
+        updatePageCounter();
+    };
+
+    run();
+</script>
+</body>
+</html>
