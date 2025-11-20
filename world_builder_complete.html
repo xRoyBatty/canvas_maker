@@ -503,6 +503,7 @@ document.addEventListener('keydown', (e) => {
         const questList = document.getElementById('quest-list');
         questList.classList.toggle('hidden');
     }
+    if (e.code === 'KeyH' && uiManager) uiManager.toggleUI();
 });
 
 document.addEventListener('keyup', (e) => {
@@ -847,21 +848,84 @@ class Game {
 
     async generateAllTextures() {
         try {
+            // Try to load cached textures first
+            const cachedTextures = await this.loadCachedTextures();
+
             // Generate block textures
             const blockTypes = ['wood', 'stone', 'clay', 'brick'];
             for (let i = 0; i < blockTypes.length; i++) {
                 const type = blockTypes[i];
-                updateLoadingProgress(92 + (i * 2), `Generating ${type} texture...`);
-                await uiManager.generateTextureFor(type, true); // silent = true
+                if (cachedTextures[type]) {
+                    updateLoadingProgress(92 + (i * 1.5), `Loading ${type} texture from cache...`);
+                    await uiManager.applyTextureFromCache(type, cachedTextures[type]);
+                } else {
+                    updateLoadingProgress(92 + (i * 1.5), `Generating ${type} texture...`);
+                    await uiManager.generateTextureFor(type, true, true); // silent = true, cache = true
+                }
             }
 
-            // Generate tool textures (optional, comment out if it takes too long)
-            // updateLoadingProgress(98, 'Generating tool textures...');
-            // await uiManager.generateRealisticTool('axe');
-            // await uiManager.generateRealisticTool('pickaxe');
+            // Generate tool textures
+            const toolTypes = ['axe', 'pickaxe'];
+            for (let i = 0; i < toolTypes.length; i++) {
+                const tool = toolTypes[i];
+                if (cachedTextures[tool]) {
+                    updateLoadingProgress(94 + (i * 1.5), `Loading ${tool} texture from cache...`);
+                    await uiManager.applyToolTextureFromCache(tool, cachedTextures[tool]);
+                } else {
+                    updateLoadingProgress(94 + (i * 1.5), `Generating ${tool} texture...`);
+                    await uiManager.generateRealisticTool(tool, true, true); // silent = true, cache = true
+                }
+            }
+
+            // Generate sword texture
+            if (cachedTextures['sword']) {
+                updateLoadingProgress(97, 'Loading sword texture from cache...');
+                await uiManager.applySwordTextureFromCache(cachedTextures['sword']);
+            } else {
+                updateLoadingProgress(97, 'Generating sword texture...');
+                await uiManager.generateSwordTexture(true); // cache = true
+            }
+
+            // Generate enemy texture
+            if (cachedTextures['enemy']) {
+                updateLoadingProgress(98, 'Loading enemy texture from cache...');
+                await uiManager.applyEnemyTextureFromCache(cachedTextures['enemy']);
+            } else {
+                updateLoadingProgress(98, 'Generating enemy texture...');
+                await uiManager.generateEnemyTexture(true); // cache = true
+            }
+
         } catch (error) {
             console.error('Texture generation failed:', error);
             // Continue anyway - game will use default colors
+        }
+    }
+
+    async loadCachedTextures() {
+        if (!userId || !db) return {};
+
+        try {
+            const cacheRef = doc(db, 'artifacts', appId, 'users', userId, 'textures', 'cache');
+            const cacheDoc = await getDoc(cacheRef);
+
+            if (cacheDoc.exists()) {
+                return cacheDoc.data();
+            }
+        } catch (error) {
+            console.error('Failed to load cached textures:', error);
+        }
+
+        return {};
+    }
+
+    async saveCachedTexture(name, base64Data) {
+        if (!userId || !db) return;
+
+        try {
+            const cacheRef = doc(db, 'artifacts', appId, 'users', userId, 'textures', 'cache');
+            await setDoc(cacheRef, { [name]: base64Data }, { merge: true });
+        } catch (error) {
+            console.error('Failed to save cached texture:', error);
         }
     }
 
@@ -1647,6 +1711,7 @@ class UIManager {
             clay: document.getElementById('inv-clay'),
             brick: document.getElementById('inv-brick')
         };
+        this.uiVisible = true;
         this.setupEventListeners();
         this.updateHotbar();
         this.setupKilnUI();
@@ -1685,6 +1750,29 @@ class UIManager {
         document.getElementById('kiln-clay-slot').addEventListener('click', () => this.addToKiln('clay'));
         document.getElementById('kiln-fuel-slot').addEventListener('click', () => this.addToKiln('fuel'));
         document.getElementById('kiln-output-slot').addEventListener('click', () => this.takeFromKiln());
+    }
+
+    toggleUI() {
+        this.uiVisible = !this.uiVisible;
+        const uiElements = [
+            'hud',
+            'build-controls',
+            'settings-toggle',
+            'quest-panel'
+        ];
+
+        uiElements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.style.display = this.uiVisible ? '' : 'none';
+            }
+        });
+
+        // Keep crosshair visible always
+        this.crosshair.style.display = '';
+
+        // Show notification about UI state
+        this.showNotification(this.uiVisible ? 'UI visible (Press H to hide)' : 'UI hidden (Press H to show)', 'info');
     }
 
     openKiln(kilnData) {
@@ -1749,7 +1837,7 @@ class UIManager {
         document.getElementById('kiln-start').style.opacity = canStart ? '1' : '0.5';
     }
 
-    async generateTextureFor(type, silent = false) {
+    async generateTextureFor(type, silent = false, cache = false) {
         const material = materials.blocks[type];
         const prompts = {
             wood: "Seamless realistic oak wood texture, natural wood grain, brown color, 4K detail, tileable",
@@ -1759,14 +1847,19 @@ class UIManager {
         };
 
         if (!prompts[type]) return;
-        await this.generateTexture(material, prompts[type], silent);
+        const base64 = await this.generateTexture(material, prompts[type], silent);
+        if (cache && base64) {
+            await game.saveCachedTexture(type, base64);
+        }
         if (!silent) {
             this.showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} texture generated!`);
         }
     }
 
-    async generateRealisticTool(toolType) {
-        this.showNotification(`Generating realistic ${toolType}...`, 'info');
+    async generateRealisticTool(toolType, silent = false, cache = false) {
+        if (!silent) {
+            this.showNotification(`Generating realistic ${toolType}...`, 'info');
+        }
 
         const toolPrompts = {
             axe: {
@@ -1782,11 +1875,11 @@ class UIManager {
         if (!toolPrompts[toolType]) return;
 
         try {
-            await this.generateTexture(materials.tools.handle, toolPrompts[toolType].handle);
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            const handleBase64 = await this.generateTexture(materials.tools.handle, toolPrompts[toolType].handle, silent);
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
             const bladeKey = toolType === 'axe' ? 'axeBlade' : 'pickaxeHead';
-            await this.generateTexture(materials.tools[bladeKey], toolPrompts[toolType].blade);
+            const bladeBase64 = await this.generateTexture(materials.tools[bladeKey], toolPrompts[toolType].blade, silent);
 
             materials.tools.handle.roughness = 0.9;
             materials.tools.handle.metalness = 0.0;
@@ -1799,13 +1892,169 @@ class UIManager {
                 materials.tools.pickaxeHead.metalness = 0.8;
             }
 
+            if (cache && handleBase64 && bladeBase64) {
+                await game.saveCachedTexture(toolType, { handle: handleBase64, blade: bladeBase64 });
+            }
+
             if (player) player.updateHeldTool();
 
-            this.showNotification(`Realistic ${toolType} generated!`);
+            if (!silent) {
+                this.showNotification(`Realistic ${toolType} generated!`);
+            }
 
         } catch (error) {
             console.error('Tool generation failed:', error);
-            this.showNotification(`Failed to generate ${toolType}`, 'error');
+            if (!silent) {
+                this.showNotification(`Failed to generate ${toolType}`, 'error');
+            }
+        }
+    }
+
+    async applyTextureFromCache(type, base64) {
+        const material = materials.blocks[type];
+        const imageUrl = `data:image/png;base64,${base64}`;
+
+        return new Promise((resolve) => {
+            new THREE.TextureLoader().load(imageUrl, (texture) => {
+                texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                texture.repeat.set(1, 1);
+                material.map = texture;
+                material.color.set(0xffffff);
+                material.needsUpdate = true;
+                resolve();
+            });
+        });
+    }
+
+    async applyToolTextureFromCache(toolType, textureData) {
+        if (!textureData.handle || !textureData.blade) return;
+
+        const handleUrl = `data:image/png;base64,${textureData.handle}`;
+        const bladeUrl = `data:image/png;base64,${textureData.blade}`;
+
+        // Load handle texture
+        await new Promise((resolve) => {
+            new THREE.TextureLoader().load(handleUrl, (texture) => {
+                texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                materials.tools.handle.map = texture;
+                materials.tools.handle.color.set(0xffffff);
+                materials.tools.handle.roughness = 0.9;
+                materials.tools.handle.metalness = 0.0;
+                materials.tools.handle.needsUpdate = true;
+                resolve();
+            });
+        });
+
+        // Load blade texture
+        const bladeKey = toolType === 'axe' ? 'axeBlade' : 'pickaxeHead';
+        await new Promise((resolve) => {
+            new THREE.TextureLoader().load(bladeUrl, (texture) => {
+                texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                materials.tools[bladeKey].map = texture;
+                materials.tools[bladeKey].color.set(0xffffff);
+
+                if (toolType === 'axe') {
+                    materials.tools[bladeKey].roughness = 0.1;
+                    materials.tools[bladeKey].metalness = 0.95;
+                } else {
+                    materials.tools[bladeKey].roughness = 0.4;
+                    materials.tools[bladeKey].metalness = 0.8;
+                }
+
+                materials.tools[bladeKey].needsUpdate = true;
+                resolve();
+            });
+        });
+
+        if (player) player.updateHeldTool();
+    }
+
+    async applySwordTextureFromCache(textureData) {
+        if (!textureData.handle || !textureData.blade) return;
+
+        const handleUrl = `data:image/png;base64,${textureData.handle}`;
+        const bladeUrl = `data:image/png;base64,${textureData.blade}`;
+
+        // Load handle texture
+        await new Promise((resolve) => {
+            new THREE.TextureLoader().load(handleUrl, (texture) => {
+                texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                materials.sword.handle.map = texture;
+                materials.sword.handle.color.set(0xffffff);
+                materials.sword.handle.roughness = 0.8;
+                materials.sword.handle.metalness = 0.1;
+                materials.sword.handle.needsUpdate = true;
+                resolve();
+            });
+        });
+
+        // Load blade texture
+        await new Promise((resolve) => {
+            new THREE.TextureLoader().load(bladeUrl, (texture) => {
+                texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                materials.sword.blade.map = texture;
+                materials.sword.blade.color.set(0xffffff);
+                materials.sword.blade.roughness = 0.05;
+                materials.sword.blade.metalness = 0.98;
+                materials.sword.blade.needsUpdate = true;
+                resolve();
+            });
+        });
+
+        if (player) player.updateHeldTool();
+    }
+
+    async applyEnemyTextureFromCache(base64) {
+        const imageUrl = `data:image/png;base64,${base64}`;
+
+        return new Promise((resolve) => {
+            new THREE.TextureLoader().load(imageUrl, (texture) => {
+                texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                materials.enemy.map = texture;
+                materials.enemy.color.set(0xffffff);
+                materials.enemy.needsUpdate = true;
+                resolve();
+            });
+        });
+    }
+
+    async generateSwordTexture(cache = false) {
+        try {
+            const handlePrompt = "Medieval sword leather grip texture, wrapped leather, brown color, weathered from combat";
+            const bladePrompt = "Steel sword blade texture, polished damascus steel, razor sharp edge, metallic silver finish";
+
+            const handleBase64 = await this.generateTexture(materials.sword.handle, handlePrompt, true);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const bladeBase64 = await this.generateTexture(materials.sword.blade, bladePrompt, true);
+
+            materials.sword.handle.roughness = 0.8;
+            materials.sword.handle.metalness = 0.1;
+            materials.sword.blade.roughness = 0.05;
+            materials.sword.blade.metalness = 0.98;
+
+            if (cache && handleBase64 && bladeBase64) {
+                await game.saveCachedTexture('sword', { handle: handleBase64, blade: bladeBase64 });
+            }
+
+            if (player) player.updateHeldTool();
+
+        } catch (error) {
+            console.error('Sword texture generation failed:', error);
+        }
+    }
+
+    async generateEnemyTexture(cache = false) {
+        try {
+            const prompt = "Dark fantasy enemy creature skin texture, rough scales, menacing appearance, dark green with red accents, 4K detail";
+            const base64 = await this.generateTexture(materials.enemy, prompt, true);
+
+            if (cache && base64) {
+                await game.saveCachedTexture('enemy', base64);
+            }
+
+        } catch (error) {
+            console.error('Enemy texture generation failed:', error);
         }
     }
 
@@ -1842,7 +2091,8 @@ class UIManager {
                 return data;
             });
 
-            const imageUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+            const base64 = result.predictions[0].bytesBase64Encoded;
+            const imageUrl = `data:image/png;base64,${base64}`;
 
             new THREE.TextureLoader().load(imageUrl, (texture) => {
                 texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
@@ -1852,11 +2102,14 @@ class UIManager {
                 material.needsUpdate = true;
             });
 
+            return base64;
+
         } catch (error) {
             console.error('Texture generation failed:', error);
             if (!silent) {
                 this.showNotification('Texture generation failed', 'error');
             }
+            return null;
         } finally {
             if (!silent) {
                 document.getElementById('loader').classList.add('hidden');
