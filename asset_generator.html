@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Asset Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .asset-card {
+            transition: all 0.3s;
+        }
+        .asset-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+        }
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-screen text-white p-8">
+
+<div class="max-w-7xl mx-auto">
+    <header class="mb-8">
+        <h1 class="text-4xl font-bold mb-2">Quiz Asset Generator</h1>
+        <p class="text-gray-300">Generate all images needed for the food quiz</p>
+    </header>
+
+    <div class="bg-slate-800/50 backdrop-blur rounded-xl p-6 mb-6">
+        <div class="flex gap-4 mb-4">
+            <button id="generate-all-btn" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition">
+                🎨 Generate All Assets
+            </button>
+            <button id="download-all-btn" class="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition" disabled>
+                ⬇️ Download All Assets as ZIP
+            </button>
+        </div>
+        <div id="progress" class="hidden">
+            <div class="bg-slate-700 rounded-full h-3 overflow-hidden">
+                <div id="progress-bar" class="bg-blue-500 h-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <p id="progress-text" class="text-sm text-gray-400 mt-2">Ready to generate...</p>
+        </div>
+    </div>
+
+    <div id="assets-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+</div>
+
+<script type="module">
+const ASSETS_TO_GENERATE = [
+    { id: 'fish', prompt: 'Fresh raw fish on white plate, clean product photography, white background, 8k quality', filename: 'fish.png' },
+    { id: 'strawberry', prompt: 'Fresh red strawberry with green leaves, clean product photography, white background, 8k quality', filename: 'strawberry.png' },
+    { id: 'jam', prompt: 'Glass jar of strawberry jam with red contents, clean product photography, white background, 8k quality', filename: 'jam.png' },
+    { id: 'fruits_vegetables', prompt: 'Fresh colorful fruits and vegetables display at market, tomatoes, lettuce, carrots, apples, oranges, clean photography, 8k quality', filename: 'fruits_vegetables.png' },
+    { id: 'chicken', prompt: 'Grilled chicken breast on white plate, clean food photography, white background, 8k quality', filename: 'chicken.png' },
+    { id: 'chips', prompt: 'Golden french fries on white plate, clean food photography, white background, 8k quality', filename: 'chips.png' },
+    { id: 'rice', prompt: 'Bowl of white cooked rice with chopsticks, Chinese style, clean food photography, white background, 8k quality', filename: 'rice.png' },
+    { id: 'sausages', prompt: 'Grilled sausages on white plate, clean food photography, white background, 8k quality', filename: 'sausages.png' },
+    { id: 'cheese', prompt: 'Piece of yellow cheese with holes on white plate, clean product photography, white background, 8k quality', filename: 'cheese.png' },
+    { id: 'strawberries_cream', prompt: 'Fresh strawberries with whipped cream in bowl, clean food photography, white background, 8k quality', filename: 'strawberries_cream.png' },
+    { id: 'coffee_sugar', prompt: 'Cup of black coffee with sugar cubes on side, clean food photography, white background, 8k quality', filename: 'coffee_sugar.png' },
+    { id: 'breakfast_club', prompt: 'School cafeteria breakfast scene with students eating cereal, toast, fruit, happy atmosphere, bright lighting, 8k quality', filename: 'breakfast_club.png' }
+];
+
+let generatedAssets = {};
+
+const generateImage = async (prompt) => {
+    return callWithRetry(async () => {
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                instances: [{ prompt: prompt }],
+                parameters: { sampleCount: 1, aspectRatio: "1:1" }
+            })
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+
+        if (result.predictions?.[0]?.bytesBase64Encoded) {
+            return result.predictions[0].bytesBase64Encoded;
+        }
+        throw new Error("Invalid image data");
+    });
+};
+
+const callWithRetry = async (apiCall, maxRetries = 5, initialDelay = 2000) => {
+    let delay = initialDelay;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            return await apiCall();
+        } catch (error) {
+            if (attempt === maxRetries) throw error;
+            await new Promise(resolve => setTimeout(resolve, delay));
+            delay *= 2;
+        }
+    }
+};
+
+function createAssetCard(asset) {
+    const div = document.createElement('div');
+    div.className = 'asset-card bg-slate-800/50 backdrop-blur rounded-xl p-4 border border-slate-700';
+    div.id = `card-${asset.id}`;
+    div.innerHTML = `
+        <div class="aspect-square bg-slate-900 rounded-lg mb-3 flex items-center justify-center" id="preview-${asset.id}">
+            <span class="text-gray-500">Not generated</span>
+        </div>
+        <h3 class="font-semibold mb-2">${asset.filename}</h3>
+        <div id="status-${asset.id}" class="text-sm text-gray-400">Waiting...</div>
+        <button onclick="generateSingle('${asset.id}')" class="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm w-full">
+            Generate This
+        </button>
+    `;
+    return div;
+}
+
+async function generateAll() {
+    const btn = document.getElementById('generate-all-btn');
+    const downloadBtn = document.getElementById('download-all-btn');
+    const progress = document.getElementById('progress');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+
+    btn.disabled = true;
+    btn.textContent = '🎨 Generating...';
+    progress.classList.remove('hidden');
+
+    let completed = 0;
+    const total = ASSETS_TO_GENERATE.length;
+
+    for (const asset of ASSETS_TO_GENERATE) {
+        try {
+            const statusEl = document.getElementById(`status-${asset.id}`);
+            statusEl.textContent = 'Generating...';
+            statusEl.className = 'text-sm text-blue-400';
+
+            progressText.textContent = `Generating ${asset.filename}...`;
+
+            const base64 = await generateImage(asset.prompt);
+            generatedAssets[asset.id] = {
+                base64: base64,
+                filename: asset.filename
+            };
+
+            const previewEl = document.getElementById(`preview-${asset.id}`);
+            previewEl.innerHTML = `<img src="data:image/png;base64,${base64}" class="w-full h-full object-cover rounded-lg">`;
+
+            statusEl.textContent = '✓ Generated';
+            statusEl.className = 'text-sm text-green-400';
+
+            completed++;
+            const percentage = (completed / total) * 100;
+            progressBar.style.width = `${percentage}%`;
+
+        } catch (error) {
+            const statusEl = document.getElementById(`status-${asset.id}`);
+            statusEl.textContent = `✗ Error: ${error.message}`;
+            statusEl.className = 'text-sm text-red-400';
+        }
+    }
+
+    progressText.textContent = 'All assets generated!';
+    btn.textContent = '✓ All Generated';
+    downloadBtn.disabled = false;
+}
+
+async function generateSingle(assetId) {
+    const asset = ASSETS_TO_GENERATE.find(a => a.id === assetId);
+    if (!asset) return;
+
+    const statusEl = document.getElementById(`status-${assetId}`);
+    statusEl.textContent = 'Generating...';
+    statusEl.className = 'text-sm text-blue-400';
+
+    try {
+        const base64 = await generateImage(asset.prompt);
+        generatedAssets[assetId] = {
+            base64: base64,
+            filename: asset.filename
+        };
+
+        const previewEl = document.getElementById(`preview-${assetId}`);
+        previewEl.innerHTML = `<img src="data:image/png;base64,${base64}" class="w-full h-full object-cover rounded-lg">`;
+
+        statusEl.textContent = '✓ Generated';
+        statusEl.className = 'text-sm text-green-400';
+
+    } catch (error) {
+        statusEl.textContent = `✗ Error: ${error.message}`;
+        statusEl.className = 'text-sm text-red-400';
+    }
+}
+
+function downloadAllAssets() {
+    // Create a text file with all base64 data that can be copy-pasted into the quiz
+    let content = 'const QUIZ_ASSETS = {\n';
+
+    for (const [id, data] of Object.entries(generatedAssets)) {
+        content += `  '${id}': 'data:image/png;base64,${data.base64}',\n`;
+    }
+
+    content += '};\n';
+
+    const blob = new Blob([content], { type: 'text/javascript' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'quiz_assets.js';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    alert('Assets downloaded! Copy the content of quiz_assets.js into your quiz HTML file.');
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    const grid = document.getElementById('assets-grid');
+    ASSETS_TO_GENERATE.forEach(asset => {
+        grid.appendChild(createAssetCard(asset));
+    });
+
+    document.getElementById('generate-all-btn').addEventListener('click', generateAll);
+    document.getElementById('download-all-btn').addEventListener('click', downloadAllAssets);
+});
+
+window.generateSingle = generateSingle;
+</script>
+
+</body>
+</html>
