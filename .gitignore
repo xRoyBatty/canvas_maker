@@ -1,0 +1,14 @@
+# Generated files
+quiz_generator_ALL_IN_ONE.html
+interactive_quiz_READY.html
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

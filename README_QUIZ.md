@@ -2,35 +2,35 @@
 
 ## Przegląd
 
-System składa się z dwóch plików:
-1. **asset_generator.html** - aplikacja Canvas do generowania obrazków
-2. **interactive_quiz.html** - gotowy quiz do wdrożenia na VPS
+**ULTRA-PROSTY WORKFLOW:**
+1. Otwórz **quiz_generator_ALL_IN_ONE.html** w Gemini Canvas
+2. Kliknij "Generate All Assets"
+3. Pobierz gotowy quiz
+4. Wgraj na VPS
 
-## Krok 1: Generowanie obrazków (w Gemini Canvas)
+**To wszystko!** Zero kopiowania, wklejania czy edytowania plików!
 
-1. Otwórz plik `asset_generator.html` w Gemini Canvas
-2. Kliknij **"Generate All Assets"**
-3. Poczekaj aż wszystkie 12 obrazków zostanie wygenerowanych
-4. Kliknij **"Download All Assets as ZIP"**
-5. Otrzymasz plik `quiz_assets.js` z wszystkimi obrazkami zakodowanymi w base64
+---
 
-## Krok 2: Integracja obrazków z quizem
+Dostępne pliki w repo:
+- **quiz_generator_ALL_IN_ONE.html** - ⭐ JEDYNY PLIK którego potrzebujesz
+- `asset_generator.html` - stary generator (używaj ALL_IN_ONE zamiast tego)
+- `interactive_quiz.html` - stary quiz template (używaj ALL_IN_ONE)
+- `build_merged.py` - skrypt łączący (do development'u)
 
-**Automatycznie:**
-Po kliknięciu "Download All Assets":
-- Assety są AUTOMATYCZNIE kopiowane do schowka
-- Pobiera się plik `quiz_assets.js` jako backup
+## Krok 1: Generuj quiz z obrazkami (w Gemini Canvas)
 
-**Manualnie wklej do quizu:**
-1. Otwórz plik `interactive_quiz.html` w edytorze tekstu
-2. Znajdź linię: `const QUIZ_ASSETS = {`
-3. Zaznacz cały obiekt (od `const` do `};`)
-4. **Wklej** skopiowane assety (`Ctrl+V` / `Cmd+V`)
-5. Zapisz plik
+1. Otwórz plik **`quiz_generator_ALL_IN_ONE.html`** w Gemini Canvas
+2. Kliknij **"Generate All Assets"** (wygeneruje 12 obrazków AI)
+3. Poczekaj ~2-3 minuty
+4. Kliknij **"Pobierz Assety (Kopiuj + Plik)"**
+5. Otrzymasz **`interactive_quiz_READY.html`** - gotowy do wgrania!
 
-Gotowe! Plik `interactive_quiz.html` ma teraz wszystkie obrazki wbudowane.
+✅ Wszystkie obrazki już wbudowane
+✅ Żadnego kopiowania/wklejania
+✅ Jeden plik HTML ready to deploy
 
-## Krok 3: Wdrożenie na VPS
+## Krok 2: Wdrożenie na VPS
 
 **WAŻNE:** Wybierz JEDNĄ z poniższych opcji. To są ALTERNATYWY, nie zależności!
 

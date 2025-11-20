@@ -214,19 +214,15 @@ function downloadAllAssets() {
 
     assetsCode += '};';
 
-    // Copy to clipboard for easy paste
-    navigator.clipboard.writeText(assetsCode).then(() => {
-        console.log('Assety skopiowane do schowka!');
-    }).catch(err => {
-        console.error('Nie można skopiować do schowka:', err);
-    });
+    // Inject assets into quiz template
+    const quizHTML = QUIZ_TEMPLATE.replace('/*INJECT_ASSETS_HERE*/', assetsCode);
 
-    // Also download as file
-    const blob = new Blob([assetsCode], { type: 'text/javascript' });
+    // Download complete quiz
+    const blob = new Blob([quizHTML], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'quiz_assets.js';
+    a.download = 'interactive_quiz_READY.html';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -234,24 +230,19 @@ function downloadAllAssets() {
 
     // Show instructions
     const instructions = `
-✅ ASSETY WYGENEROWANE!
+✅ GOTOWY QUIZ POBRANY!
 
-KR OK 1: Assety skopiowane do schowka i pobrane jako quiz_assets.js
+Plik: interactive_quiz_READY.html
 
-KROK 2: Wklej assety do quizu:
+WSZYSTKIE ASSETY SĄ JUŻ WBUDOWANE!
 
-1. Otwórz plik interactive_quiz.html w edytorze
-2. Znajdź linię:  const QUIZ_ASSETS = {
-3. Zaznacz cały obiekt QUIZ_ASSETS (od const do };)
-4. Wklej skopiowane assety (Ctrl+V)
-5. Zapisz plik
+Teraz wystarczy wgrać na VPS:
 
-KROK 3: Wgraj na VPS:
-   scp interactive_quiz.html user@twój-vps:~/
+   scp interactive_quiz_READY.html user@twój-vps:~/quiz.html
    ssh user@twój-vps
    python3 -m http.server 8080
 
-Quiz dostępny na: http://twój-vps-ip:8080/interactive_quiz.html
+Quiz dostępny na: http://twój-vps-ip:8080/quiz.html
 
 Gotowe! 🎉
     `;
