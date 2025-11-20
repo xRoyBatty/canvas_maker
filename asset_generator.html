@@ -451,17 +451,20 @@ Edit interactive_quiz_READY.html:
 
 \`\`\`javascript
 const USE_BACKEND = true;
-const LEADERBOARD_API = 'http://your-vps/api/leaderboard.php';
+// RECOMMENDED: Use relative URL (auto HTTPS!)
+const LEADERBOARD_API = '/api/leaderboard.php';
+// OR full URL if needed:
+// const LEADERBOARD_API = 'https://your-domain.com/api/leaderboard.php';
 \`\`\`
 
 ## Test
 
 \`\`\`bash
 # GET leaderboard
-curl http://your-vps/api/leaderboard.php
+curl https://your-domain.com/api/leaderboard.php
 
 # POST score
-curl -X POST http://your-vps/api/leaderboard.php \\
+curl -X POST https://your-domain.com/api/leaderboard.php \\
   -H "Content-Type: application/json" \\
   -d '{"name":"Test","score":25,"time":"10:30"}'
 \`\`\`

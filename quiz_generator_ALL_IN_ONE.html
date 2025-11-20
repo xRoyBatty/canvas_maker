@@ -451,17 +451,20 @@ Edit interactive_quiz_READY.html:
 
 \`\`\`javascript
 const USE_BACKEND = true;
-const LEADERBOARD_API = 'http://your-vps/api/leaderboard.php';
+// RECOMMENDED: Use relative URL (auto HTTPS!)
+const LEADERBOARD_API = '/api/leaderboard.php';
+// OR full URL if needed:
+// const LEADERBOARD_API = 'https://your-domain.com/api/leaderboard.php';
 \`\`\`
 
 ## Test
 
 \`\`\`bash
 # GET leaderboard
-curl http://your-vps/api/leaderboard.php
+curl https://your-domain.com/api/leaderboard.php
 
 # POST score
-curl -X POST http://your-vps/api/leaderboard.php \\
+curl -X POST https://your-domain.com/api/leaderboard.php \\
   -H "Content-Type: application/json" \\
   -d '{"name":"Test","score":25,"time":"10:30"}'
 \`\`\`
@@ -753,10 +756,10 @@ const QUIZ_TEMPLATE = `<!DOCTYPE html>
 
 // BACKEND CONFIGURATION
 // Set USE_BACKEND to true and provide your API URL to enable persistent leaderboard
-const USE_BACKEND = false; // Change to true to enable PHP backend
+const USE_BACKEND = true; // Change to false for offline mode
 // RECOMMENDED: Use relative URL (automatically uses HTTPS if page is HTTPS)
 // Example: \`/api/leaderboard.php\` or '/quizik/leaderboard.php'
-const LEADERBOARD_API = '/api/leaderboard.php'; // Change to your backend path
+const LEADERBOARD_API = '/quizik/leaderboard.php'; // Change to your backend path
 
 // Placeholder for assets - replace with generated assets from Canvas app
 /*INJECT_ASSETS_HERE*/
