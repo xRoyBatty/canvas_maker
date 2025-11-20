@@ -512,10 +512,10 @@ const QUIZ_TEMPLATE = `<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Food & Grammar Quiz</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"><\/script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: \`Inter\`, sans-serif; }
 
         .question-card {
             animation: slideIn 0.5s ease-out;
@@ -627,7 +627,7 @@ const QUIZ_TEMPLATE = `<!DOCTYPE html>
         .sortable-item:hover {
             transform: translateX(5px);
         }
-    </style>
+    <\/style>
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 min-h-screen text-white">
 
@@ -727,7 +727,7 @@ const LEADERBOARD_API = 'http://your-vps/api/leaderboard.php'; // Change to your
 
 const GRAMMAR_THEORIES = {
     'containers': {
-        title: 'Teoria: Pojemniki i opakowania (Containers)',
+        title: \`Teoria: Pojemniki i opakowania (Containers)\`,
         content: \`
             <h3 class="font-bold text-lg mb-2">Najważniejsze pojemniki w języku angielskim:</h3>
             <ul class="list-disc list-inside space-y-2 mb-4">
@@ -746,7 +746,7 @@ const GRAMMAR_THEORIES = {
         \`
     },
     'articles': {
-        title: 'Teoria: Przedimki a / an / - (Articles)',
+        title: \`Teoria: Przedimki a / an / - (Articles)\`,
         content: \`
             <h3 class="font-bold text-lg mb-2">Kiedy używamy przedimków?</h3>
             <ul class="list-disc list-inside space-y-2 mb-4">
@@ -768,7 +768,7 @@ const GRAMMAR_THEORIES = {
         \`
     },
     'quantifiers': {
-        title: 'Teoria: Określenia ilości (Quantifiers: much, many, some, any, a lot)',
+        title: \`Teoria: Określenia ilości (Quantifiers: much, many, some, any, a lot)\`,
         content: \`
             <h3 class="font-bold text-lg mb-2">Jak mówić o ilości?</h3>
             <div class="space-y-3 mb-4">
@@ -806,169 +806,169 @@ const QUESTIONS = [
     // Q1-8: Fill in the blank with images
     {
         id: 1,
-        type: 'fill-blank',
+        type: \`fill-blank\`,
         time: 60,
         points: 1,
-        image: 'fish',
-        question: 'Look at the picture and complete the word:',
-        text: 'f_sh',
-        answer: 'fish',
+        image: \`fish\`,
+        question: \`Look at the picture and complete the word:\`,
+        text: \`f_sh\`,
+        answer: \`fish\`,
         alternatives: []
     },
     {
         id: 2,
-        type: 'fill-blank',
+        type: \`fill-blank\`,
         time: 60,
         points: 1,
-        image: 'strawberry',
-        question: 'Look at the picture and complete the word:',
-        text: 'str_wberry',
-        answer: 'strawberry',
+        image: \`strawberry\`,
+        question: \`Look at the picture and complete the word:\`,
+        text: \`str_wberry\`,
+        answer: \`strawberry\`,
         alternatives: []
     },
     {
         id: 3,
-        type: 'fill-blank',
+        type: \`fill-blank\`,
         time: 60,
         points: 1,
-        image: 'jam',
-        question: 'Look at the picture and complete the word:',
-        text: 'j_m',
-        answer: 'jam',
+        image: \`jam\`,
+        question: \`Look at the picture and complete the word:\`,
+        text: \`j_m\`,
+        answer: \`jam\`,
         alternatives: []
     },
     {
         id: 4,
-        type: 'fill-blank',
+        type: \`fill-blank\`,
         time: 60,
         points: 1,
-        image: 'fruits_vegetables',
-        question: 'The (0)________ and vegetables look yummy.',
-        answer: 'fruit',
+        image: \`fruits_vegetables\`,
+        question: \`The (0)________ and vegetables look yummy.\`,
+        answer: \`fruit\`,
         alternatives: ['fruits']
     },
     {
         id: 5,
-        type: 'fill-blank',
+        type: \`fill-blank\`,
         time: 60,
         points: 1,
-        image: 'chicken',
-        question: 'And I want some (1) c_____________ too.',
-        answer: 'chicken',
+        image: \`chicken\`,
+        question: \`And I want some (1) c_____________ too.\`,
+        answer: \`chicken\`,
         alternatives: []
     },
     {
         id: 6,
-        type: 'fill-blank',
+        type: \`fill-blank\`,
         time: 60,
         points: 1,
-        image: 'rice',
-        question: 'I like chicken, but I want to try the Chinese (2) r_____________.',
-        answer: 'rice',
+        image: \`rice\`,
+        question: \`I like chicken, but I want to try the Chinese (2) r_____________.\`,
+        answer: \`rice\`,
         alternatives: []
     },
     {
         id: 7,
-        type: 'fill-blank',
+        type: \`fill-blank\`,
         time: 60,
         points: 1,
-        image: 'sausages',
-        question: 'Can I have the (3) s_____________?',
-        answer: 'sausages',
+        image: \`sausages\`,
+        question: \`Can I have the (3) s_____________?\`,
+        answer: \`sausages\`,
         alternatives: []
     },
     {
         id: 8,
-        type: 'fill-blank',
+        type: \`fill-blank\`,
         time: 60,
         points: 1,
-        image: 'cheese',
-        question: 'Max: Are you still hungry? Sonia: Yes, I am! Can I have some 4 c_____________ and biscuits now?',
-        answer: 'cheese',
+        image: \`cheese\`,
+        question: \`Max: Are you still hungry? Sonia: Yes, I am! Can I have some 4 c_____________ and biscuits now?\`,
+        answer: \`cheese\`,
         alternatives: []
     },
     {
         id: 9,
-        type: 'fill-blank',
+        type: \`fill-blank\`,
         time: 60,
         points: 1,
-        image: 'strawberries_cream',
-        question: 'I want some 5 s_____________ and cream.',
-        answer: 'strawberries',
+        image: \`strawberries_cream\`,
+        question: \`I want some 5 s_____________ and cream.\`,
+        answer: \`strawberries\`,
         alternatives: []
     },
     {
         id: 10,
-        type: 'fill-blank',
+        type: \`fill-blank\`,
         time: 60,
         points: 1,
-        image: 'coffee_sugar',
-        question: 'And I want some coffee with 6 s_____________.',
-        answer: 'sugar',
+        image: \`coffee_sugar\`,
+        question: \`And I want some coffee with 6 s_____________.\`,
+        answer: \`sugar\`,
         alternatives: []
     },
 
     // Q9-13: Multiple choice (categorization)
     {
         id: 11,
-        type: 'multiple-choice',
+        type: \`multiple-choice\`,
         time: 30,
         points: 1,
-        question: 'Zakreśl słowa, które NIE pasują do podanej kategorii.<br/>Vegetables: tomatoes / potatoes / toast',
+        question: \`Zakreśl słowa, które NIE pasują do podanej kategorii.<br/>Vegetables: tomatoes / potatoes / toast\`,
         options: ['tomatoes', 'potatoes', 'toast'],
-        answer: 'toast'
+        answer: \`toast\`
     },
     {
         id: 12,
-        type: 'multiple-choice',
+        type: \`multiple-choice\`,
         time: 30,
         points: 1,
-        question: 'Zakreśl słowa, które NIE pasują do podanej kategorii.<br/>Food from animals: pasta / ham / meat',
+        question: \`Zakreśl słowa, które NIE pasują do podanej kategorii.<br/>Food from animals: pasta / ham / meat\`,
         options: ['pasta', 'ham', 'meat'],
-        answer: 'pasta'
+        answer: \`pasta\`
     },
     {
         id: 13,
-        type: 'multiple-choice',
+        type: \`multiple-choice\`,
         time: 30,
         points: 1,
-        question: 'Zakreśl słowa, które NIE pasują do podanej kategorii.<br/>Fruit: apples / oranges / pancakes',
+        question: \`Zakreśl słowa, które NIE pasują do podanej kategorii.<br/>Fruit: apples / oranges / pancakes\`,
         options: ['apples', 'oranges', 'pancakes'],
-        answer: 'pancakes'
+        answer: \`pancakes\`
     },
     {
         id: 14,
-        type: 'multiple-choice',
+        type: \`multiple-choice\`,
         time: 30,
         points: 1,
-        question: 'Zakreśl słowa, które NIE pasują do podanej kategorii.<br/>Food from the sea: fish / tuna / yoghurt',
+        question: \`Zakreśl słowa, które NIE pasują do podanej kategorii.<br/>Food from the sea: fish / tuna / yoghurt\`,
         options: ['fish', 'tuna', 'yoghurt'],
-        answer: 'yoghurt'
+        answer: \`yoghurt\`
     },
     {
         id: 15,
-        type: 'multiple-choice',
+        type: \`multiple-choice\`,
         time: 30,
         points: 1,
-        question: 'Zakreśl słowa, które NIE pasują do podanej kategorii.<br/>Food from plants: cereal / milk / bread',
+        question: \`Zakreśl słowa, które NIE pasują do podanej kategorii.<br/>Food from plants: cereal / milk / bread\`,
         options: ['cereal', 'milk', 'bread'],
-        answer: 'milk'
+        answer: \`milk\`
     },
 
     // Q14: Drag and drop - THEORY REQUIRED
     {
         id: 16,
-        type: 'drag-drop',
+        type: \`drag-drop\`,
         time: 90,
         points: 1,
-        theory: 'containers',
-        question: 'Uzupełnij zdania podanymi słowami: bar, can, jar, bottle, carton',
+        theory: \`containers\`,
+        question: \`Uzupełnij zdania podanymi słowami: bar, can, jar, bottle, carton\`,
         items: [
-            { text: 'There is a _____ of cola in the fridge.', answer: 'can' },
-            { text: "There's a _____ of water in the kitchen.", answer: 'bottle' },
-            { text: 'We need to buy a _____ of jam in the supermarket.', answer: 'jar' },
-            { text: "I'd like that _____ of chocolate, please.", answer: 'bar' },
-            { text: "There isn't any juice in the _____.", answer: 'carton' }
+            { text: \`There is a _____ of cola in the fridge.\`, answer: \`can\` },
+            { text: "There's a _____ of water in the kitchen.", answer: \`bottle\` },
+            { text: \`We need to buy a _____ of jam in the supermarket.\`, answer: \`jar\` },
+            { text: "I'd like that _____ of chocolate, please.", answer: \`bar\` },
+            { text: "There isn't any juice in the _____.", answer: \`carton\` }
         ],
         words: ['bar', 'can', 'jar', 'bottle', 'carton']
     },
@@ -976,102 +976,102 @@ const QUESTIONS = [
     // Q15-21: Multiple choice (articles) - THEORY REQUIRED
     {
         id: 17,
-        type: 'multiple-choice',
+        type: \`multiple-choice\`,
         time: 30,
         points: 1,
-        theory: 'articles',
-        question: 'You need _____ milk',
+        theory: \`articles\`,
+        question: \`You need _____ milk\`,
         options: ['a', '-'],
-        answer: '-'
+        answer: \`-\`
     },
     {
         id: 18,
-        type: 'multiple-choice',
+        type: \`multiple-choice\`,
         time: 30,
         points: 1,
-        theory: 'articles',
-        question: '_____ egg',
+        theory: \`articles\`,
+        question: \`_____ egg\`,
         options: ['a', 'an'],
-        answer: 'an'
+        answer: \`an\`
     },
     {
         id: 19,
-        type: 'multiple-choice',
+        type: \`multiple-choice\`,
         time: 30,
         points: 1,
-        theory: 'articles',
-        question: '_____ flour',
+        theory: \`articles\`,
+        question: \`_____ flour\`,
         options: ['a', '-'],
-        answer: '-'
+        answer: \`-\`
     },
     {
         id: 20,
-        type: 'multiple-choice',
+        type: \`multiple-choice\`,
         time: 30,
         points: 1,
-        theory: 'articles',
-        question: '_____ chocolate (as material)',
+        theory: \`articles\`,
+        question: \`_____ chocolate (as material)\`,
         options: ['a', '-'],
-        answer: '-'
+        answer: \`-\`
     },
     {
         id: 21,
-        type: 'multiple-choice',
+        type: \`multiple-choice\`,
         time: 30,
         points: 1,
-        theory: 'articles',
-        question: '_____ bar of chocolate',
+        theory: \`articles\`,
+        question: \`_____ bar of chocolate\`,
         options: ['a', '-'],
-        answer: 'a'
+        answer: \`a\`
     },
     {
         id: 22,
-        type: 'multiple-choice',
+        type: \`multiple-choice\`,
         time: 30,
         points: 1,
-        theory: 'articles',
-        question: '_____ sugar',
+        theory: \`articles\`,
+        question: \`_____ sugar\`,
         options: ['an', '-'],
-        answer: '-'
+        answer: \`-\`
     },
     {
         id: 23,
-        type: 'multiple-choice',
+        type: \`multiple-choice\`,
         time: 30,
         points: 1,
-        theory: 'articles',
-        question: 'You need _____ lemon for the topping too.',
+        theory: \`articles\`,
+        question: \`You need _____ lemon for the topping too.\`,
         options: ['a', '-'],
-        answer: 'a'
+        answer: \`a\`
     },
 
     // Q22-23: Drag and drop (quantifiers) - THEORY REQUIRED
     {
         id: 24,
-        type: 'drag-drop',
+        type: \`drag-drop\`,
         time: 90,
         points: 1,
-        theory: 'quantifiers',
-        question: 'Uzupełnij dialog podanymi słowami: a lot, any, many, much, some',
+        theory: \`quantifiers\`,
+        question: \`Uzupełnij dialog podanymi słowami: a lot, any, many, much, some\`,
         items: [
-            { text: "Lilian: I'm hungry! Nigel: There's _____ bread in the kitchen.", answer: 'some' },
-            { text: 'Lilian: How _____ bread is there?', answer: 'much' },
-            { text: "Nigel: There's _____ of bread.", answer: 'a lot' },
-            { text: 'Lilian: Good! We can make _____ sandwiches.', answer: 'some' }
+            { text: "Lilian: I'm hungry! Nigel: There's _____ bread in the kitchen.", answer: \`some\` },
+            { text: \`Lilian: How _____ bread is there?\`, answer: \`much\` },
+            { text: "Nigel: There's _____ of bread.", answer: \`a lot\` },
+            { text: \`Lilian: Good! We can make _____ sandwiches.\`, answer: \`some\` }
         ],
         words: ['a lot', 'any', 'many', 'much', 'some']
     },
     {
         id: 25,
-        type: 'drag-drop',
+        type: \`drag-drop\`,
         time: 90,
         points: 1,
-        theory: 'quantifiers',
-        question: 'Uzupełnij dialog c.d.:',
+        theory: \`quantifiers\`,
+        question: \`Uzupełnij dialog c.d.:\`,
         items: [
-            { text: 'Nigel: Is there _____ butter?', answer: 'any' },
-            { text: "Lilian: No, there isn't, so we can't make _____ sandwiches.", answer: 'any' },
-            { text: 'Nigel: How _____ biscuits are there?', answer: 'many' }
+            { text: \`Nigel: Is there _____ butter?\`, answer: \`any\` },
+            { text: "Lilian: No, there isn't, so we can't make _____ sandwiches.", answer: \`any\` },
+            { text: \`Nigel: How _____ biscuits are there?\`, answer: \`many\` }
         ],
         words: ['any', 'many', 'some', 'much']
     },
@@ -1079,38 +1079,38 @@ const QUESTIONS = [
     // Q24: Reorder
     {
         id: 26,
-        type: 'reorder',
+        type: \`reorder\`,
         time: 90,
         points: 1,
-        question: 'Ułóż w odpowiedniej kolejności następujące zdania, żeby utworzyć dialog. Pierwsze zdanie jest już na miejscu:<br/><strong>0. Are you ready to order? What would you like?</strong>',
+        question: \`Ułóż w odpowiedniej kolejności następujące zdania, żeby utworzyć dialog. Pierwsze zdanie jest już na miejscu:<br/><strong>0. Are you ready to order? What would you like?</strong>\`,
         items: [
-            { id: 1, text: 'Anything else?', order: 4 },
-            { id: 2, text: 'And would you like anything to drink?', order: 2 },
-            { id: 3, text: 'No, thank you.', order: 5 },
+            { id: 1, text: \`Anything else?\`, order: 4 },
+            { id: 2, text: \`And would you like anything to drink?\`, order: 2 },
+            { id: 3, text: \`No, thank you.\`, order: 5 },
             { id: 4, text: "Yes, please. I'd like a glass of juice, please.", order: 3 },
-            { id: 5, text: 'Can I have a pizza, please?', order: 1 }
+            { id: 5, text: \`Can I have a pizza, please?\`, order: 1 }
         ]
     },
 
     // Q25-33: Reading comprehension
     {
         id: 27,
-        type: 'reading',
+        type: \`reading\`,
         time: 600,
         points: 9,
-        image: 'breakfast_club',
+        image: \`breakfast_club\`,
         passage: \`<h3 class="font-bold text-xl mb-4">School breakfast clubs</h3>
         <p>Mornings are usually difficult for school children. Children often haven't got time to eat breakfast. They arrive at school hungry and have problems during lessons. In some schools there are breakfast clubs. Students can have a quick breakfast there. They can have cereal with milk or yoghurt, sandwiches and toast with jam or ham, and some fruit (usually apples or bananas). They drink tea or mineral water. After breakfast in the club, the children usually have some time to play and have a chat with their friends before they start their lessons. Breakfast at school helps children start a day with a smile. They are also never late for classes – they are already at school.</p>\`,
         questions: [
-            { text: 'Some students don't have _________ before school.', answer: 'breakfast' },
-            { text: 'Some students are ______________ when they come to school.', answer: 'hungry' },
-            { text: 'In some schools there are ______________ clubs.', answer: 'breakfast' },
-            { text: 'Students can often have some fruit, like bananas or ______________.', answer: 'apples' },
-            { text: 'After breakfast, students can ______________ with their friends.', answer: 'chat', alternatives: ['play'] },
-            { text: 'Children who eat breakfast at school are ______________ late for lessons.', answer: 'never' },
-            { text: 'Children drink some tea or _________', answer: 'water', alternatives: ['mineral water'] },
-            { text: 'Hungry children have ____________ during lessons.', answer: 'problems' },
-            { text: 'Mornings are NOT _________ for school children', answer: 'easy', alternatives: ['simple'] }
+            { text: \`Some students don't have _________ before school.\`, answer: \`breakfast\` },
+            { text: \`Some students are ______________ when they come to school.\`, answer: \`hungry\` },
+            { text: \`In some schools there are ______________ clubs.\`, answer: \`breakfast\` },
+            { text: \`Students can often have some fruit, like bananas or ______________.\`, answer: \`apples\` },
+            { text: \`After breakfast, students can ______________ with their friends.\`, answer: \`chat\`, alternatives: ['play'] },
+            { text: \`Children who eat breakfast at school are ______________ late for lessons.\`, answer: \`never\` },
+            { text: \`Children drink some tea or _________\`, answer: \`water\`, alternatives: ['mineral water'] },
+            { text: \`Hungry children have ____________ during lessons.\`, answer: \`problems\` },
+            { text: \`Mornings are NOT _________ for school children\`, answer: \`easy\`, alternatives: ['simple'] }
         ]
     }
 ];
@@ -1131,9 +1131,9 @@ let wrongAfterTheory = {};
 
 // Leaderboard (simulated - in real deployment, use backend)
 let leaderboard = [
-    { name: 'Anna K.', score: 28, time: '15:23' },
-    { name: 'Piotr M.', score: 26, time: '18:45' },
-    { name: 'Maria W.', score: 25, time: '14:12' }
+    { name: \`Anna K.\`, score: 28, time: \`15:23\` },
+    { name: \`Piotr M.\`, score: 26, time: \`18:45\` },
+    { name: \`Maria W.\`, score: 25, time: \`14:12\` }
 ];
 
 // ============================================
@@ -1791,7 +1791,7 @@ async function finishQuiz() {
     if (USE_BACKEND && studentName) {
         try {
             const response = await fetch(LEADERBOARD_API, {
-                method: 'POST',
+                method: \`POST\`,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name: studentName,
@@ -1831,7 +1831,7 @@ async function finishQuiz() {
 
     let rankMessage = '';
     if (rank) {
-        const medals = { 1: '🥇', 2: '🥈', 3: '🥉' };
+        const medals = { 1: \`🥇\`, 2: \`🥈\`, 3: \`🥉\` };
         rankMessage = \`<p class="text-2xl font-bold mb-4">\${medals[rank] || '🏅'} Miejsce \${rank} w rankingu!</p>\`;
     }
 
@@ -1895,7 +1895,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateNavigationButtons();
     updateProgress();
 });
-</script>
+<\/script>
 
 </body>
 </html>

@@ -18,8 +18,20 @@ quiz_html = re.sub(
     flags=re.DOTALL
 )
 
+# Fix apostrophes: Use template literals (backticks) instead of single quotes
+# This handles apostrophes like don't, it's automatically without escaping
+# Pattern: property: 'any content including apostrophes' followed by comma, space or brace
+# .+? is non-greedy and stops at the first ' followed by valid ending
+quiz_html = re.sub(
+    r"(\w+): '(.+?)'([,\s}])",
+    r'\1: `\2`\3',
+    quiz_html
+)
+
 # Escape for JavaScript template literal
+# CRITICAL: Escape </script> and </style> tags to prevent premature closing
 quiz_template = quiz_html.replace('\\', '\\\\').replace('`', '\\`').replace('$', '\\$')
+quiz_template = quiz_template.replace('</script>', '<\\/script>').replace('</style>', '<\\/style>')
 
 # Read asset generator
 with open('asset_generator.html', 'r', encoding='utf-8') as f:
