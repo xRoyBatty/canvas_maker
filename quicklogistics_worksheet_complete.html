@@ -295,10 +295,31 @@
 </div>
 
 <!-- Loading Screen -->
-<div class="loading-screen hidden" id="loading-screen">
-    <div class="text-center">
-        <div class="text-6xl mb-4 animate-bounce">📚</div>
-        <h2 class="text-3xl font-bold">Loading Worksheet...</h2>
+<div class="loading-screen" id="loading-screen">
+    <div class="text-center max-w-4xl mx-auto px-6">
+        <div class="mb-8">
+            <div class="text-6xl mb-4 animate-bounce">📦</div>
+            <h1 class="text-4xl font-bold mb-2">QuickLogistics Worksheet</h1>
+            <p class="text-gray-400">Preparing your interactive lesson with AI-generated assets...</p>
+        </div>
+
+        <div class="bg-slate-800 rounded-lg p-6 mb-6 text-left">
+            <div class="flex items-center gap-2 mb-4">
+                <div class="loading-spinner"></div>
+                <span id="loading-text" class="font-semibold">Initializing...</span>
+            </div>
+            <div id="loading-log" class="bg-slate-900 rounded p-4 text-sm font-mono text-green-400 h-64 overflow-y-auto">
+                <div class="text-blue-400">→ Starting initialization...</div>
+            </div>
+        </div>
+
+        <div class="bg-slate-700 rounded-full h-3 overflow-hidden mb-4">
+            <div id="loading-progress-bar" class="bg-blue-500 h-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+
+        <button id="download-offline-btn" class="hidden px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition" onclick="downloadOfflineVersion()">
+            ⬇ Download Offline Version (with all assets embedded)
+        </button>
     </div>
 </div>
 
@@ -2741,10 +2762,14 @@ async function loadOrGenerateAssets() {
                 const base64 = await generateImage(imgConfig.prompt, imgConfig.aspect);
                 const compressed = await compressImage(`data:image/png;base64,${base64}`, 0.6);
                 await saveAssetToFirestore(imgConfig.id, 'image/jpeg', compressed);
+                assetData = { base64data: compressed, mimeType: 'image/jpeg' };
                 log(`✓ Generated: ${imgConfig.id}`, "success");
             } else {
                 log(`✓ Cached: ${imgConfig.id}`, "success");
             }
+
+            // Store for offline download
+            generatedAssets[imgConfig.id] = `data:${assetData.mimeType};base64,${assetData.base64data}`;
 
             completed++;
             updateProgress(completed, totalAssets, `Images: ${completed}/${VOCABULARY_IMAGES.length}`);
@@ -2758,10 +2783,22 @@ async function loadOrGenerateAssets() {
             if (!assetData) {
                 const pcmBase64 = await generateTTS(audioConfig.text, false);
                 await saveAssetToFirestore(audioConfig.id, 'audio/pcm;rate=24000', pcmBase64);
+                assetData = { base64data: pcmBase64, mimeType: 'audio/pcm;rate=24000' };
                 log(`✓ Generated: ${audioConfig.id}`, "success");
             } else {
                 log(`✓ Cached: ${audioConfig.id}`, "success");
             }
+
+            // Convert PCM to WAV and store for offline download
+            const sampleRate = parseInt(assetData.mimeType.match(/rate=(\d+)/)[1], 10);
+            const pcmArray = new Int16Array(base64ToArrayBuffer(assetData.base64data));
+            const wavBlob = pcmToWav(pcmArray, sampleRate);
+            const wavDataUrl = await new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(wavBlob);
+            });
+            generatedAssets[audioConfig.id] = wavDataUrl;
 
             completed++;
             updateProgress(completed, totalAssets, `Audio: ${completed - VOCABULARY_IMAGES.length}/${VOCABULARY_AUDIO.length}`);
@@ -2784,7 +2821,15 @@ async function loadOrGenerateAssets() {
         const pcmArray = new Int16Array(base64ToArrayBuffer(dialogueData.base64data));
         const wavBlob = pcmToWav(pcmArray, sampleRate);
         const audioUrl = URL.createObjectURL(wavBlob);
-        document.getElementById('dialogue-audio').src = audioUrl;
+        const wavDataUrl = await new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(wavBlob);
+        });
+        generatedAssets[LC_DIALOGUE.id] = wavDataUrl;
+
+        const audioElement = document.getElementById('dialogue-audio');
+        if (audioElement) audioElement.src = audioUrl;
 
         completed++;
         updateProgress(completed, totalAssets, "All assets ready!");
@@ -2794,6 +2839,97 @@ async function loadOrGenerateAssets() {
     } catch (error) {
         log(`Asset generation failed: ${error.message}`, "error");
         throw error;
+    }
+}
+
+// ============================================
+// OFFLINE DOWNLOAD
+// ============================================
+let generatedAssets = {};
+
+async function downloadOfflineVersion() {
+    const btn = document.getElementById('download-offline-btn');
+    const originalText = btn.textContent;
+    btn.textContent = '⬇ Preparing download...';
+    btn.disabled = true;
+
+    try {
+        log("Creating offline version...", "info");
+
+        // Clone the document
+        const clone = document.documentElement.cloneNode(true);
+
+        // Remove loading screen
+        const loadingScreen = clone.querySelector('#loading-screen');
+        if (loadingScreen) loadingScreen.remove();
+
+        // Show main container
+        const mainContainer = clone.querySelector('#main-container');
+        if (mainContainer) {
+            mainContainer.classList.remove('hidden');
+            mainContainer.style.display = 'block';
+        }
+
+        // Embed all generated assets as data URLs
+        for (const [id, dataUrl] of Object.entries(generatedAssets)) {
+            const elements = clone.querySelectorAll(`[data-asset-id="${id}"]`);
+            elements.forEach(el => {
+                if (el.tagName === 'IMG') {
+                    el.src = dataUrl;
+                } else if (el.tagName === 'AUDIO' || el.tagName === 'SOURCE') {
+                    el.src = dataUrl;
+                }
+            });
+        }
+
+        // Remove script that initializes Firebase/assets (not needed offline)
+        const scripts = clone.querySelectorAll('script');
+        scripts.forEach(script => {
+            const content = script.textContent;
+            if (content.includes('initFirebase') || content.includes('loadOrGenerateAssets')) {
+                script.remove();
+            }
+        });
+
+        // Add simple standalone script
+        const standaloneScript = clone.querySelector('body').appendChild(clone.createElement('script'));
+        standaloneScript.textContent = `
+// Standalone offline version
+document.addEventListener('DOMContentLoaded', () => {
+    const mainContainer = document.getElementById('main-container');
+    if (mainContainer) mainContainer.classList.remove('hidden');
+    goToPage(0);
+});
+`;
+
+        // Generate HTML
+        const html = '<!DOCTYPE html>\n' + clone.outerHTML;
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+
+        // Download
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'QuickLogistics_Worksheet_Offline_Complete.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        log("✓ Offline version downloaded!", "success");
+        btn.textContent = '✓ Downloaded!';
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }, 3000);
+
+    } catch (error) {
+        log(`Download failed: ${error.message}`, "error");
+        btn.textContent = '✗ Download failed';
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }, 3000);
     }
 }
 
@@ -2808,12 +2944,19 @@ async function init() {
         log("Loading or generating assets...", "info");
         await loadOrGenerateAssets();
 
+        // Show download button after assets are ready
+        const downloadBtn = document.getElementById('download-offline-btn');
+        if (downloadBtn) {
+            downloadBtn.classList.remove('hidden');
+            log("✓ Download button ready", "success");
+        }
+
         setTimeout(() => {
             document.getElementById('loading-screen').classList.add('hidden');
             document.getElementById('main-container').classList.remove('hidden');
             goToPage(0);
             log("Worksheet ready!", "success");
-        }, 1000);
+        }, 1500);
 
     } catch (error) {
         log(`Initialization failed: ${error.message}`, "error");
