@@ -326,7 +326,7 @@
             </div>
             <div class="bg-green-50 p-6 rounded-lg border-2 border-green-200">
                 <h3 class="text-xl font-bold text-green-900 mb-3">🎯 About This Lesson</h3>
-                <p class="text-gray-700 mb-4"><strong>Total Pages:</strong> 36 slides</p>
+                <p class="text-gray-700 mb-4"><strong>Total Pages:</strong> 36 pages</p>
                 <p class="text-gray-700 mb-4"><strong>Duration:</strong> Flexible (your teacher decides)</p>
                 <p class="text-gray-700 mb-4"><strong>Method:</strong> PPP Cycle (Present-Practice-Produce)</p>
                 <p class="text-gray-700"><strong>Company:</strong> QuickLogistics (fictional)</p>
@@ -584,8 +584,188 @@
     </div>
 </div>
 
-<!-- PAGE 8: N2 Hub Vocabulary Introduction -->
+<!-- PAGE 8: N1 Labeling Activity -->
 <div class="worksheet-page" id="page-8">
+    <div class="section-header">
+        <h2 class="text-2xl font-bold">🏷️ N1 Labeling Activity</h2>
+        <p class="mt-1">Label the logistics operation diagram</p>
+    </div>
+    <div class="content-box">
+        <div class="bg-gray-100 p-6 rounded-lg mb-6 text-center">
+            <div class="text-6xl mb-4">📊</div>
+            <p class="text-gray-600 mb-4">Diagram showing QuickLogistics depot with various vehicles and delivery operations</p>
+            <div class="bg-white rounded-lg p-8 border-2 border-gray-300">
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">🚐</div>
+                        <p class="text-xs text-gray-500">Point A</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">🚛</div>
+                        <p class="text-xs text-gray-500">Point B</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">🗺️</div>
+                        <p class="text-xs text-gray-500">Point C</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">📦</div>
+                        <p class="text-xs text-gray-500">Point D</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">🚗🚐🚛</div>
+                        <p class="text-xs text-gray-500">Point E</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="text-xl font-bold mb-4">Label each point:</h3>
+        <div class="space-y-3">
+            <div class="flex items-center gap-3">
+                <span class="font-bold w-24">Point A:</span>
+                <input type="text" class="input-field flex-1" id="n1_label_a" placeholder="Type the correct word...">
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="font-bold w-24">Point B:</span>
+                <input type="text" class="input-field flex-1" id="n1_label_b" placeholder="Type the correct word...">
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="font-bold w-24">Point C:</span>
+                <input type="text" class="input-field flex-1" id="n1_label_c" placeholder="Type the correct word...">
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="font-bold w-24">Point D:</span>
+                <input type="text" class="input-field flex-1" id="n1_label_d" placeholder="Type the correct word...">
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="font-bold w-24">Point E:</span>
+                <input type="text" class="input-field flex-1" id="n1_label_e" placeholder="Type the correct word...">
+            </div>
+        </div>
+
+        <div class="mt-6 bg-blue-50 p-4 rounded border-2 border-blue-200">
+            <p class="font-bold mb-2">Word Bank:</p>
+            <p class="text-sm">van • lorry • trailer • route • fleet</p>
+        </div>
+
+        <button class="btn-primary mt-6" onclick="checkN1Labels()">✓ Check Labels</button>
+        <div class="feedback-box" id="feedback-n1-labels"></div>
+    </div>
+</div>
+
+<!-- PAGE 9: N1 Quiz -->
+<div class="worksheet-page" id="page-9">
+    <div class="section-header">
+        <h2 class="text-2xl font-bold">📝 N1 Quick Quiz</h2>
+        <p class="mt-1">Test your fleet vocabulary knowledge</p>
+    </div>
+    <div class="content-box">
+        <div class="space-y-4">
+            <div class="question-box">
+                <p class="font-bold mb-3">1. What word means "all company vehicles together"?</p>
+                <div class="space-y-2">
+                    <label class="radio-option">
+                        <input type="radio" name="n1_quiz_1" value="a">
+                        <span>a) route</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n1_quiz_1" value="b">
+                        <span>b) fleet</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n1_quiz_1" value="c">
+                        <span>c) vehicle</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p class="font-bold mb-3">2. A small delivery vehicle for city use is called a ___.</p>
+                <div class="space-y-2">
+                    <label class="radio-option">
+                        <input type="radio" name="n1_quiz_2" value="a">
+                        <span>a) van</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n1_quiz_2" value="b">
+                        <span>b) lorry</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n1_quiz_2" value="c">
+                        <span>c) trailer</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p class="font-bold mb-3">3. What attaches to the back of a lorry to carry more goods?</p>
+                <div class="space-y-2">
+                    <label class="radio-option">
+                        <input type="radio" name="n1_quiz_3" value="a">
+                        <span>a) van</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n1_quiz_3" value="b">
+                        <span>b) trailer</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n1_quiz_3" value="c">
+                        <span>c) route</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p class="font-bold mb-3">4. The planned driving path is called a ___.</p>
+                <div class="space-y-2">
+                    <label class="radio-option">
+                        <input type="radio" name="n1_quiz_4" value="a">
+                        <span>a) delivery</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n1_quiz_4" value="b">
+                        <span>b) vehicle</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n1_quiz_4" value="c">
+                        <span>c) route</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p class="font-bold mb-3">5. When you bring goods to a customer, you make a ___.</p>
+                <div class="space-y-2">
+                    <label class="radio-option">
+                        <input type="radio" name="n1_quiz_5" value="a">
+                        <span>a) delivery</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n1_quiz_5" value="b">
+                        <span>b) lorry</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n1_quiz_5" value="c">
+                        <span>c) fleet</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-primary mt-6" onclick="checkN1Quiz()">✓ Check Quiz</button>
+        <div class="feedback-box" id="feedback-n1-quiz"></div>
+
+        <div class="bg-green-50 border-2 border-green-300 p-4 rounded-lg mt-6">
+            <p class="font-bold text-green-900">✅ N1 Fleet Vocabulary Complete! Now let's learn about hub operations.</p>
+        </div>
+    </div>
+</div>
+
+<!-- PAGE 10: N2 Hub Vocabulary Introduction -->
+<div class="worksheet-page" id="page-10">
     <div class="section-header">
         <h2 class="text-2xl font-bold">🏭 N2: Hub Operations (7 Words)</h2>
         <p class="mt-1">Click each card to see the meaning</p>
@@ -665,8 +845,8 @@
     </div>
 </div>
 
-<!-- PAGE 9: N2 Training -->
-<div class="worksheet-page" id="page-9">
+<!-- PAGE 11: N2 Training -->
+<div class="worksheet-page" id="page-11">
     <div class="section-header">
         <h2 class="text-2xl font-bold">✏️ N2 Training: Match & Complete</h2>
     </div>
@@ -699,8 +879,114 @@
     </div>
 </div>
 
-<!-- PAGE 10: N2 Picture Puzzle -->
-<div class="worksheet-page" id="page-10">
+<!-- PAGE 12: N2 Scenario Matching -->
+<div class="worksheet-page" id="page-12">
+    <div class="section-header">
+        <h2 class="text-2xl font-bold">🎯 N2 Scenario Matching</h2>
+        <p class="mt-1">Match each situation to the correct equipment</p>
+    </div>
+    <div class="content-box">
+        <p class="mb-6 text-gray-600">Read each scenario and choose which hub equipment is needed.</p>
+
+        <div class="space-y-4">
+            <div class="question-box">
+                <p class="font-bold mb-3">1. "We need to move 500 heavy boxes from loading dock 3 to storage area B."</p>
+                <div class="space-y-2">
+                    <label class="radio-option">
+                        <input type="radio" name="n2_scenario_1" value="a">
+                        <span>a) scanner</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n2_scenario_1" value="b">
+                        <span>b) forklift</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n2_scenario_1" value="c">
+                        <span>c) conveyor belt</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p class="font-bold mb-3">2. "I need to check the barcode on every package to track inventory."</p>
+                <div class="space-y-2">
+                    <label class="radio-option">
+                        <input type="radio" name="n2_scenario_2" value="a">
+                        <span>a) pallet</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n2_scenario_2" value="b">
+                        <span>b) scanner</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n2_scenario_2" value="c">
+                        <span>c) loading dock</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p class="font-bold mb-3">3. "The lorry arrived with 1,000 boxes. Where should the driver park to unload?"</p>
+                <div class="space-y-2">
+                    <label class="radio-option">
+                        <input type="radio" name="n2_scenario_3" value="a">
+                        <span>a) warehouse</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n2_scenario_3" value="b">
+                        <span>b) loading dock</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n2_scenario_3" value="c">
+                        <span>c) conveyor belt</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p class="font-bold mb-3">4. "We need to organize these 200 small boxes onto wooden platforms for storage."</p>
+                <div class="space-y-2">
+                    <label class="radio-option">
+                        <input type="radio" name="n2_scenario_4" value="a">
+                        <span>a) pallets</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n2_scenario_4" value="b">
+                        <span>b) shipment</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n2_scenario_4" value="c">
+                        <span>c) forklift</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p class="font-bold mb-3">5. "Boxes move automatically from the unloading area to the sorting station."</p>
+                <div class="space-y-2">
+                    <label class="radio-option">
+                        <input type="radio" name="n2_scenario_5" value="a">
+                        <span>a) loading dock</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n2_scenario_5" value="b">
+                        <span>b) conveyor belt</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n2_scenario_5" value="c">
+                        <span>c) scanner</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-primary mt-6" onclick="checkN2Scenarios()">✓ Check Answers</button>
+        <div class="feedback-box" id="feedback-n2-scenarios"></div>
+    </div>
+</div>
+
+<!-- PAGE 13: N2 Picture Puzzle -->
+<div class="worksheet-page" id="page-13">
     <div class="section-header">
         <h2 class="text-2xl font-bold">🧩 N2 Picture Puzzle</h2>
     </div>
@@ -728,10 +1014,193 @@
     </div>
 </div>
 
-<!-- Continue with remaining pages... For brevity, I'll add key pages -->
+<!-- PAGE 14: N2 Warehouse Map Labeling -->
+<div class="worksheet-page" id="page-14">
+    <div class="section-header">
+        <h2 class="text-2xl font-bold">🗺️ N2 Warehouse Map Labeling</h2>
+        <p class="mt-1">Label the QuickLogistics warehouse layout</p>
+    </div>
+    <div class="content-box">
+        <div class="bg-gray-100 p-6 rounded-lg mb-6">
+            <h3 class="text-center font-bold mb-4">Top-Down View: QuickLogistics London Hub</h3>
+            <div class="bg-white rounded-lg p-8 border-4 border-gray-400">
+                <div class="grid grid-cols-3 gap-6">
+                    <div class="bg-blue-100 p-6 rounded border-2 border-blue-400 text-center">
+                        <div class="text-5xl mb-2">🚪</div>
+                        <p class="text-xs text-gray-600">Area A</p>
+                    </div>
+                    <div class="bg-green-100 p-6 rounded border-2 border-green-400 text-center">
+                        <div class="text-5xl mb-2">⚙️</div>
+                        <p class="text-xs text-gray-600">Area B</p>
+                    </div>
+                    <div class="bg-yellow-100 p-6 rounded border-2 border-yellow-400 text-center">
+                        <div class="text-5xl mb-2">📋📋</div>
+                        <p class="text-xs text-gray-600">Area C</p>
+                    </div>
+                    <div class="bg-purple-100 p-6 rounded border-2 border-purple-400 text-center">
+                        <div class="text-5xl mb-2">🚜</div>
+                        <p class="text-xs text-gray-600">Area D</p>
+                    </div>
+                    <div class="bg-red-100 p-6 rounded border-2 border-red-400 text-center">
+                        <div class="text-5xl mb-2">📦📦📦</div>
+                        <p class="text-xs text-gray-600">Area E</p>
+                    </div>
+                    <div class="bg-orange-100 p-6 rounded border-2 border-orange-400 text-center">
+                        <div class="text-5xl mb-2">📱</div>
+                        <p class="text-xs text-gray-600">Area F</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<!-- PAGE 11-17: Abbreviated remaining N2 + transition to N3 -->
-<div class="worksheet-page" id="page-11">
+        <h3 class="text-xl font-bold mb-4">Identify each warehouse area:</h3>
+        <div class="space-y-3">
+            <div class="flex items-center gap-3">
+                <span class="font-bold w-24">Area A:</span>
+                <input type="text" class="input-field flex-1" id="n2_map_a" placeholder="Type the correct word...">
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="font-bold w-24">Area B:</span>
+                <input type="text" class="input-field flex-1" id="n2_map_b" placeholder="Type the correct word...">
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="font-bold w-24">Area C:</span>
+                <input type="text" class="input-field flex-1" id="n2_map_c" placeholder="Type the correct word...">
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="font-bold w-24">Area D:</span>
+                <input type="text" class="input-field flex-1" id="n2_map_d" placeholder="Type the correct word...">
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="font-bold w-24">Area E:</span>
+                <input type="text" class="input-field flex-1" id="n2_map_e" placeholder="Type the correct word...">
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="font-bold w-24">Area F:</span>
+                <input type="text" class="input-field flex-1" id="n2_map_f" placeholder="Type the correct word...">
+            </div>
+        </div>
+
+        <div class="mt-6 bg-green-50 p-4 rounded border-2 border-green-200">
+            <p class="font-bold mb-2">Word Bank:</p>
+            <p class="text-sm">loading dock • conveyor belt • pallet storage • forklift zone • shipment area • scanner station</p>
+        </div>
+
+        <button class="btn-primary mt-6" onclick="checkN2Map()">✓ Check Map Labels</button>
+        <div class="feedback-box" id="feedback-n2-map"></div>
+    </div>
+</div>
+
+<!-- PAGE 15: N2 Quiz -->
+<div class="worksheet-page" id="page-15">
+    <div class="section-header">
+        <h2 class="text-2xl font-bold">📝 N2 Quick Quiz</h2>
+        <p class="mt-1">Test your hub operations vocabulary</p>
+    </div>
+    <div class="content-box">
+        <div class="space-y-4">
+            <div class="question-box">
+                <p class="font-bold mb-3">1. A large building where goods are stored is called a ___.</p>
+                <div class="space-y-2">
+                    <label class="radio-option">
+                        <input type="radio" name="n2_quiz_1" value="a">
+                        <span>a) warehouse</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n2_quiz_1" value="b">
+                        <span>b) loading dock</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n2_quiz_1" value="c">
+                        <span>c) pallet</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p class="font-bold mb-3">2. What machine lifts heavy pallets?</p>
+                <div class="space-y-2">
+                    <label class="radio-option">
+                        <input type="radio" name="n2_quiz_2" value="a">
+                        <span>a) scanner</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n2_quiz_2" value="b">
+                        <span>b) conveyor belt</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n2_quiz_2" value="c">
+                        <span>c) forklift</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p class="font-bold mb-3">3. A wooden platform that holds boxes is called a ___.</p>
+                <div class="space-y-2">
+                    <label class="radio-option">
+                        <input type="radio" name="n2_quiz_3" value="a">
+                        <span>a) pallet</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n2_quiz_3" value="b">
+                        <span>b) shipment</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n2_quiz_3" value="c">
+                        <span>c) loading dock</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p class="font-bold mb-3">4. You use this device to read barcodes.</p>
+                <div class="space-y-2">
+                    <label class="radio-option">
+                        <input type="radio" name="n2_quiz_4" value="a">
+                        <span>a) forklift</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n2_quiz_4" value="b">
+                        <span>b) scanner</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n2_quiz_4" value="c">
+                        <span>c) pallet</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p class="font-bold mb-3">5. A group of packages being transported together is called a ___.</p>
+                <div class="space-y-2">
+                    <label class="radio-option">
+                        <input type="radio" name="n2_quiz_5" value="a">
+                        <span>a) conveyor belt</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n2_quiz_5" value="b">
+                        <span>b) warehouse</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n2_quiz_5" value="c">
+                        <span>c) shipment</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-primary mt-6" onclick="checkN2Quiz()">✓ Check Quiz</button>
+        <div class="feedback-box" id="feedback-n2-quiz"></div>
+
+        <div class="bg-green-50 border-2 border-green-300 p-4 rounded-lg mt-6">
+            <p class="font-bold text-green-900">✅ N2 Hub Vocabulary Complete!</p>
+        </div>
+    </div>
+</div>
+
+<!-- PAGE 16: Checkpoint Summary -->
+<div class="worksheet-page" id="page-16">
     <div class="section-header">
         <h2 class="text-2xl font-bold">✅ N1 & N2 Complete!</h2>
     </div>
@@ -771,8 +1240,8 @@
     </div>
 </div>
 
-<!-- PAGES 12-17: N3 Grammar (Have/Has) - Complete grammar treatment -->
-<div class="worksheet-page" id="page-12">
+<!-- PAGES 17-22: N3 Grammar (Have/Has) - Complete grammar treatment -->
+<div class="worksheet-page" id="page-17">
     <div class="section-header">
         <h2 class="text-2xl font-bold">📖 N3: Grammar - "We have"</h2>
     </div>
@@ -793,7 +1262,7 @@
     </div>
 </div>
 
-<div class="worksheet-page" id="page-13">
+<div class="worksheet-page" id="page-18">
     <div class="section-header">
         <h2 class="text-2xl font-bold">📖 N3: Grammar - "It has"</h2>
     </div>
@@ -814,7 +1283,7 @@
     </div>
 </div>
 
-<div class="worksheet-page" id="page-14">
+<div class="worksheet-page" id="page-19">
     <div class="section-header">
         <h2 class="text-2xl font-bold">📖 N3: Negatives</h2>
     </div>
@@ -841,7 +1310,7 @@
     </div>
 </div>
 
-<div class="worksheet-page" id="page-15">
+<div class="worksheet-page" id="page-20">
     <div class="section-header">
         <h2 class="text-2xl font-bold">📖 N3: Questions</h2>
     </div>
@@ -870,7 +1339,7 @@
     </div>
 </div>
 
-<div class="worksheet-page" id="page-16">
+<div class="worksheet-page" id="page-21">
     <div class="section-header">
         <h2 class="text-2xl font-bold">✏️ N3 Training: Complete Sentences</h2>
     </div>
@@ -894,7 +1363,7 @@
     </div>
 </div>
 
-<div class="worksheet-page" id="page-17">
+<div class="worksheet-page" id="page-22">
     <div class="section-header">
         <h2 class="text-2xl font-bold">🧩 N3 Picture Puzzle</h2>
     </div>
@@ -915,8 +1384,8 @@
     </div>
 </div>
 
-<!-- PAGES 18-24: N4 Management (Integrated from agent output) -->
-<div class="worksheet-page" id="page-18">
+<!-- PAGES 23-26: N4 Management (Integrated from agent output) -->
+<div class="worksheet-page" id="page-23">
     <div class="section-header">
         <h2 class="text-2xl font-bold">👥 N4: I Manage</h2>
         <p class="mt-1">Learn to talk about management responsibilities</p>
@@ -961,7 +1430,7 @@
     </div>
 </div>
 
-<div class="worksheet-page" id="page-19">
+<div class="worksheet-page" id="page-24">
     <div class="section-header">
         <h2 class="text-2xl font-bold">❓ N4: Who Manages What?</h2>
     </div>
@@ -1012,7 +1481,7 @@
     </div>
 </div>
 
-<div class="worksheet-page" id="page-20">
+<div class="worksheet-page" id="page-25">
     <div class="section-header">
         <h2 class="text-2xl font-bold">✏️ N4 Training</h2>
     </div>
@@ -1033,8 +1502,145 @@
     </div>
 </div>
 
-<!-- PAGES 21-28: Integration (LC + RC) - Simplified but complete -->
-<div class="worksheet-page" id="page-21">
+<!-- PAGE 26: N4 Matching Exercise -->
+<div class="worksheet-page" id="page-26">
+    <div class="section-header">
+        <h2 class="text-2xl font-bold">🎯 N4 Matching: Who Manages What?</h2>
+        <p class="mt-1">Match each manager to what they manage</p>
+    </div>
+    <div class="content-box">
+        <p class="mb-6 text-gray-600">Read about the QuickLogistics management team and match each person to their responsibility.</p>
+
+        <div class="bg-blue-50 p-6 rounded-lg border-2 border-blue-200 mb-6">
+            <h3 class="font-bold text-lg mb-4">Meet the Management Team:</h3>
+            <div class="grid md:grid-cols-2 gap-4 text-sm">
+                <div class="bg-white p-4 rounded">
+                    <p class="font-bold text-purple-600 mb-1">👩‍💼 Sarah Chen - Fleet Manager</p>
+                    <p class="text-gray-700">"I make sure all our vehicles are ready. I plan maintenance schedules and coordinate with drivers daily."</p>
+                </div>
+                <div class="bg-white p-4 rounded">
+                    <p class="font-bold text-blue-600 mb-1">👨‍💼 Tom Williams - Operations Director</p>
+                    <p class="text-gray-700">"I oversee all three of our facilities in London, Bristol, and Manchester. I ensure smooth operations everywhere."</p>
+                </div>
+                <div class="bg-white p-4 rounded">
+                    <p class="font-bold text-green-600 mb-1">👩‍💼 Maria Garcia - Logistics Coordinator</p>
+                    <p class="text-gray-700">"I track every shipment from start to finish. I manage 200+ packages every single day."</p>
+                </div>
+                <div class="bg-white p-4 rounded">
+                    <p class="font-bold text-yellow-600 mb-1">👨‍💼 John Patel - Route Planner</p>
+                    <p class="text-gray-700">"I design the most efficient paths for our drivers. I manage 45 different delivery routes across the UK."</p>
+                </div>
+                <div class="bg-white p-4 rounded">
+                    <p class="font-bold text-red-600 mb-1">👩‍💼 Lisa Johnson - Stock Manager</p>
+                    <p class="text-gray-700">"I keep track of everything we have in storage. I use scanners and computers to manage all products."</p>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="text-xl font-bold mb-4">Match each person to what they manage:</h3>
+        <div class="space-y-4">
+            <div class="question-box">
+                <p class="font-bold mb-3">1. Sarah Chen manages the ___.</p>
+                <div class="space-y-2">
+                    <label class="radio-option">
+                        <input type="radio" name="n4_match_1" value="a">
+                        <span>a) warehouses</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n4_match_1" value="b">
+                        <span>b) drivers and fleet</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n4_match_1" value="c">
+                        <span>c) inventory</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p class="font-bold mb-3">2. Tom Williams manages the ___.</p>
+                <div class="space-y-2">
+                    <label class="radio-option">
+                        <input type="radio" name="n4_match_2" value="a">
+                        <span>a) routes</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n4_match_2" value="b">
+                        <span>b) warehouses</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n4_match_2" value="c">
+                        <span>c) deliveries</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p class="font-bold mb-3">3. Maria Garcia manages the ___.</p>
+                <div class="space-y-2">
+                    <label class="radio-option">
+                        <input type="radio" name="n4_match_3" value="a">
+                        <span>a) inventory</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n4_match_3" value="b">
+                        <span>b) drivers</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n4_match_3" value="c">
+                        <span>c) deliveries</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p class="font-bold mb-3">4. John Patel manages the ___.</p>
+                <div class="space-y-2">
+                    <label class="radio-option">
+                        <input type="radio" name="n4_match_4" value="a">
+                        <span>a) routes</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n4_match_4" value="b">
+                        <span>b) warehouses</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n4_match_4" value="c">
+                        <span>c) fleet</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p class="font-bold mb-3">5. Lisa Johnson manages the ___.</p>
+                <div class="space-y-2">
+                    <label class="radio-option">
+                        <input type="radio" name="n4_match_5" value="a">
+                        <span>a) inventory</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n4_match_5" value="b">
+                        <span>b) deliveries</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="n4_match_5" value="c">
+                        <span>c) routes</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-primary mt-6" onclick="checkN4Match()">✓ Check Matches</button>
+        <div class="feedback-box" id="feedback-n4-match"></div>
+
+        <div class="bg-green-50 border-2 border-green-300 p-4 rounded-lg mt-6">
+            <p class="font-bold text-green-900">✅ N4 Management Complete! Now let's practice everything together in the integration phase.</p>
+        </div>
+    </div>
+</div>
+
+<!-- PAGES 27-31: Integration (LC + RC) - Simplified but complete -->
+<div class="worksheet-page" id="page-27">
     <div class="section-header">
         <h2 class="text-2xl font-bold">🎧 INTEGRATION: Listening Comprehension</h2>
         <p class="mt-1">⚠️ Uses ALL vocabulary: N1 + N2 + N3 + N4</p>
@@ -1072,7 +1678,7 @@
     </div>
 </div>
 
-<div class="worksheet-page" id="page-22">
+<div class="worksheet-page" id="page-28">
     <div class="section-header">
         <h2 class="text-2xl font-bold">✏️ LC: True or False?</h2>
     </div>
@@ -1110,7 +1716,7 @@
     </div>
 </div>
 
-<div class="worksheet-page" id="page-23">
+<div class="worksheet-page" id="page-29">
     <div class="section-header">
         <h2 class="text-2xl font-bold">✏️ LC: Answer Questions</h2>
     </div>
@@ -1140,7 +1746,7 @@
     </div>
 </div>
 
-<div class="worksheet-page" id="page-24">
+<div class="worksheet-page" id="page-30">
     <div class="section-header">
         <h2 class="text-2xl font-bold">📄 INTEGRATION: Reading Comprehension</h2>
         <p class="mt-1">⚠️ Uses ALL vocabulary: N1 + N2 + N3 + N4</p>
@@ -1188,7 +1794,7 @@
     </div>
 </div>
 
-<div class="worksheet-page" id="page-25">
+<div class="worksheet-page" id="page-31">
     <div class="section-header">
         <h2 class="text-2xl font-bold">✏️ RC: Answer Questions</h2>
     </div>
@@ -1218,8 +1824,8 @@
     </div>
 </div>
 
-<!-- PAGES 26-32: Final Production -->
-<div class="worksheet-page" id="page-26">
+<!-- PAGES 32-35: Final Production -->
+<div class="worksheet-page" id="page-32">
     <div class="section-header">
         <h2 class="text-2xl font-bold">🗣️ PRODUCTION: Speaking Task</h2>
         <p class="mt-1">Framework-based (reuses LC structure)</p>
@@ -1284,7 +1890,7 @@
     </div>
 </div>
 
-<div class="worksheet-page" id="page-27">
+<div class="worksheet-page" id="page-33">
     <div class="section-header">
         <h2 class="text-2xl font-bold">✍️ PRODUCTION: Writing Task</h2>
         <p class="mt-1">Framework-based (reuses RC structure)</p>
@@ -1328,7 +1934,7 @@
     </div>
 </div>
 
-<div class="worksheet-page" id="page-28">
+<div class="worksheet-page" id="page-34">
     <div class="section-header">
         <h2 class="text-2xl font-bold">📚 Visual Summary</h2>
         <p class="mt-1">All vocabulary at a glance</p>
@@ -1468,13 +2074,13 @@
     </div>
 </div>
 
-<div class="worksheet-page" id="page-29">
+<div class="worksheet-page" id="page-35">
     <div class="section-header">
         <h1 class="text-4xl font-bold">🎉 Congratulations!</h1>
     </div>
     <div class="content-box text-center">
         <div class="text-6xl mb-6">✅</div>
-        <h2 class="text-3xl font-bold mb-6">You Completed All 30 Pages!</h2>
+        <h2 class="text-3xl font-bold mb-6">You Completed All 36 Pages!</h2>
 
         <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-lg p-8 mb-6">
             <h3 class="text-2xl font-bold text-green-900 mb-4">What You've Mastered:</h3>
@@ -1519,7 +2125,7 @@
 <!-- Navigation Controls -->
 <div class="nav-controls">
     <button class="btn-primary" id="prev-btn" onclick="previousPage()">← Previous</button>
-    <div class="page-counter" id="page-counter">Page 1 / 30</div>
+    <div class="page-counter" id="page-counter">Page 1 / 36</div>
     <button class="btn-primary" id="next-btn" onclick="nextPage()">Next →</button>
 </div>
 
@@ -1528,7 +2134,7 @@
 // GLOBALS
 // ============================================
 let currentPage = 0;
-const totalPages = 30;
+const totalPages = 36;
 let timerInterval = null;
 let timeRemaining = 60;
 
@@ -1640,6 +2246,121 @@ window.checkN4 = function() {
     feedback.innerHTML = correct === Object.keys(answers).length
         ? '<strong>✓ Great job!</strong>'
         : `<strong>Check your answers!</strong> ${correct}/${Object.keys(answers).length} correct.`;
+};
+
+// N1 Labeling Check
+window.checkN1Labels = function() {
+    const answers = { n1_label_a: 'van', n1_label_b: 'lorry', n1_label_c: 'route', n1_label_d: 'trailer', n1_label_e: 'fleet' };
+    let correct = 0;
+    for (const [id, answer] of Object.entries(answers)) {
+        const input = document.getElementById(id);
+        if (input && input.value.trim().toLowerCase() === answer.toLowerCase()) {
+            correct++;
+            input.style.borderColor = '#22c55e';
+        } else {
+            input.style.borderColor = '#ef4444';
+        }
+    }
+    const feedback = document.getElementById('feedback-n1-labels');
+    feedback.className = correct === Object.keys(answers).length ? 'feedback-box correct' : 'feedback-box incorrect';
+    feedback.innerHTML = correct === Object.keys(answers).length
+        ? '<strong>✓ Perfect labeling!</strong>'
+        : `<strong>Try again!</strong> ${correct}/${Object.keys(answers).length} correct.`;
+};
+
+// N1 Quiz Check
+window.checkN1Quiz = function() {
+    const answers = { n1_quiz_1: 'b', n1_quiz_2: 'a', n1_quiz_3: 'b', n1_quiz_4: 'c', n1_quiz_5: 'a' };
+    let correct = 0;
+    for (const [name, answer] of Object.entries(answers)) {
+        const selected = document.querySelector(`input[name="${name}"]:checked`);
+        if (selected && selected.value === answer) {
+            correct++;
+        }
+    }
+    const feedback = document.getElementById('feedback-n1-quiz');
+    feedback.className = correct === Object.keys(answers).length ? 'feedback-box correct' : 'feedback-box incorrect';
+    feedback.innerHTML = correct === Object.keys(answers).length
+        ? '<strong>✓ Excellent! 5/5 correct!</strong>'
+        : `<strong>Review the vocabulary!</strong> You got ${correct}/${Object.keys(answers).length} correct.`;
+};
+
+// N2 Scenarios Check
+window.checkN2Scenarios = function() {
+    const answers = { n2_scenario_1: 'b', n2_scenario_2: 'b', n2_scenario_3: 'b', n2_scenario_4: 'a', n2_scenario_5: 'b' };
+    let correct = 0;
+    for (const [name, answer] of Object.entries(answers)) {
+        const selected = document.querySelector(`input[name="${name}"]:checked`);
+        if (selected && selected.value === answer) {
+            correct++;
+        }
+    }
+    const feedback = document.getElementById('feedback-n2-scenarios');
+    feedback.className = correct === Object.keys(answers).length ? 'feedback-box correct' : 'feedback-box incorrect';
+    feedback.innerHTML = correct === Object.keys(answers).length
+        ? '<strong>✓ Perfect matching!</strong>'
+        : `<strong>Think about the scenarios!</strong> ${correct}/${Object.keys(answers).length} correct.`;
+};
+
+// N2 Map Check
+window.checkN2Map = function() {
+    const answers = {
+        n2_map_a: 'loading dock',
+        n2_map_b: 'conveyor belt',
+        n2_map_c: 'pallet storage',
+        n2_map_d: 'forklift zone',
+        n2_map_e: 'shipment area',
+        n2_map_f: 'scanner station'
+    };
+    let correct = 0;
+    for (const [id, answer] of Object.entries(answers)) {
+        const input = document.getElementById(id);
+        if (input && input.value.trim().toLowerCase() === answer.toLowerCase()) {
+            correct++;
+            input.style.borderColor = '#22c55e';
+        } else {
+            input.style.borderColor = '#ef4444';
+        }
+    }
+    const feedback = document.getElementById('feedback-n2-map');
+    feedback.className = correct === Object.keys(answers).length ? 'feedback-box correct' : 'feedback-box incorrect';
+    feedback.innerHTML = correct === Object.keys(answers).length
+        ? '<strong>✓ Excellent map reading!</strong>'
+        : `<strong>Check the word bank!</strong> ${correct}/${Object.keys(answers).length} correct.`;
+};
+
+// N2 Quiz Check
+window.checkN2Quiz = function() {
+    const answers = { n2_quiz_1: 'a', n2_quiz_2: 'c', n2_quiz_3: 'a', n2_quiz_4: 'b', n2_quiz_5: 'c' };
+    let correct = 0;
+    for (const [name, answer] of Object.entries(answers)) {
+        const selected = document.querySelector(`input[name="${name}"]:checked`);
+        if (selected && selected.value === answer) {
+            correct++;
+        }
+    }
+    const feedback = document.getElementById('feedback-n2-quiz');
+    feedback.className = correct === Object.keys(answers).length ? 'feedback-box correct' : 'feedback-box incorrect';
+    feedback.innerHTML = correct === Object.keys(answers).length
+        ? '<strong>✓ Perfect score! 5/5!</strong>'
+        : `<strong>Review the hub vocabulary!</strong> You got ${correct}/${Object.keys(answers).length} correct.`;
+};
+
+// N4 Match Check
+window.checkN4Match = function() {
+    const answers = { n4_match_1: 'b', n4_match_2: 'b', n4_match_3: 'c', n4_match_4: 'a', n4_match_5: 'a' };
+    let correct = 0;
+    for (const [name, answer] of Object.entries(answers)) {
+        const selected = document.querySelector(`input[name="${name}"]:checked`);
+        if (selected && selected.value === answer) {
+            correct++;
+        }
+    }
+    const feedback = document.getElementById('feedback-n4-match');
+    feedback.className = correct === Object.keys(answers).length ? 'feedback-box correct' : 'feedback-box incorrect';
+    feedback.innerHTML = correct === Object.keys(answers).length
+        ? '<strong>✓ Perfect! All managers matched correctly!</strong>'
+        : `<strong>Re-read the descriptions!</strong> ${correct}/${Object.keys(answers).length} correct.`;
 };
 
 // ============================================
