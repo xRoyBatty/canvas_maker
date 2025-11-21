@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slides 25-32: Management & Integration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+
+        .slide {
+            display: none;
+            animation: fadeIn 0.4s ease-in;
+        }
+        .slide.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .vocab-card {
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .vocab-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+        }
+        .vocab-card.selected {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        .vocab-card.correct {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+        .vocab-card.incorrect {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .manager-card {
+            transition: all 0.3s;
+        }
+        .manager-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+        }
+
+        .question-input {
+            transition: all 0.3s;
+        }
+        .question-input:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .question-input.correct {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.05);
+        }
+        .question-input.incorrect {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .audio-player {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .org-chart-line {
+            border-left: 2px solid #6b7280;
+            border-bottom: 2px solid #6b7280;
+        }
+
+        .report-paper {
+            background: linear-gradient(to bottom, #ffffff 0%, #f9fafb 100%);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .nav-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4b5563;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .nav-dot.active {
+            background: #3b82f6;
+            transform: scale(1.4);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen text-white">
+
+<div class="max-w-6xl mx-auto p-6">
+
+    <!-- Navigation -->
+    <div class="flex justify-between items-center mb-6">
+        <button id="prev-btn" class="px-6 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg font-semibold transition">
+            ← Previous
+        </button>
+        <div class="flex gap-2">
+            <div class="nav-dot" data-slide="25"></div>
+            <div class="nav-dot" data-slide="26"></div>
+            <div class="nav-dot" data-slide="27"></div>
+            <div class="nav-dot" data-slide="28"></div>
+            <div class="nav-dot" data-slide="29"></div>
+            <div class="nav-dot" data-slide="30"></div>
+            <div class="nav-dot" data-slide="31"></div>
+            <div class="nav-dot" data-slide="32"></div>
+        </div>
+        <button id="next-btn" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition">
+            Next →
+        </button>
+    </div>
+
+    <!-- SLIDE 25: Introduction - "I manage" -->
+    <section id="slide-25" class="slide active">
+        <div class="bg-slate-800/50 backdrop-blur rounded-xl p-8 border border-slate-700">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h2 class="text-3xl font-bold text-purple-400 mb-2">N4: I Manage</h2>
+                    <p class="text-gray-300">Learn to talk about management responsibilities</p>
+                </div>
+                <span class="text-5xl font-bold text-purple-400/20">25/36</span>
+            </div>
+
+            <div class="bg-purple-900/30 border border-purple-500 rounded-lg p-6 mb-8">
+                <h3 class="text-2xl font-bold mb-4 text-center">Grammar Pattern: I manage + object</h3>
+                <div class="text-center text-xl mb-4">
+                    <span class="text-purple-400 font-bold">Subject</span> +
+                    <span class="text-green-400 font-bold"> manage/manages</span> +
+                    <span class="text-blue-400 font-bold"> object</span>
+                </div>
+                <div class="text-center text-gray-300">
+                    <p>I <span class="text-green-400">manage</span> the <span class="text-blue-400">drivers</span>.</p>
+                    <p>Sarah <span class="text-green-400">manages</span> the <span class="text-blue-400">warehouse</span>.</p>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-semibold mb-4 text-center">5 Management Objects</h3>
+
+            <div class="grid md:grid-cols-5 gap-4 mb-8">
+                <div class="manager-card bg-gradient-to-br from-purple-900 to-purple-800 rounded-lg p-4 border border-purple-600">
+                    <div class="text-center mb-3">
+                        <div class="text-6xl mb-2">👥</div>
+                        <h4 class="font-bold text-lg text-purple-300">drivers</h4>
+                    </div>
+                    <div class="text-sm text-gray-300">
+                        <p class="italic">"I manage 15 drivers."</p>
+                    </div>
+                </div>
+
+                <div class="manager-card bg-gradient-to-br from-blue-900 to-blue-800 rounded-lg p-4 border border-blue-600">
+                    <div class="text-center mb-3">
+                        <div class="text-6xl mb-2">🏭</div>
+                        <h4 class="font-bold text-lg text-blue-300">warehouses</h4>
+                    </div>
+                    <div class="text-sm text-gray-300">
+                        <p class="italic">"She manages 3 warehouses."</p>
+                    </div>
+                </div>
+
+                <div class="manager-card bg-gradient-to-br from-green-900 to-green-800 rounded-lg p-4 border border-green-600">
+                    <div class="text-center mb-3">
+                        <div class="text-6xl mb-2">📦</div>
+                        <h4 class="font-bold text-lg text-green-300">deliveries</h4>
+                    </div>
+                    <div class="text-sm text-gray-300">
+                        <p class="italic">"He manages all deliveries."</p>
+                    </div>
+                </div>
+
+                <div class="manager-card bg-gradient-to-br from-yellow-900 to-yellow-800 rounded-lg p-4 border border-yellow-600">
+                    <div class="text-center mb-3">
+                        <div class="text-6xl mb-2">🗺️</div>
+                        <h4 class="font-bold text-lg text-yellow-300">routes</h4>
+                    </div>
+                    <div class="text-sm text-gray-300">
+                        <p class="italic">"I manage 20 routes."</p>
+                    </div>
+                </div>
+
+                <div class="manager-card bg-gradient-to-br from-red-900 to-red-800 rounded-lg p-4 border border-red-600">
+                    <div class="text-center mb-3">
+                        <div class="text-6xl mb-2">📊</div>
+                        <h4 class="font-bold text-lg text-red-300">inventory</h4>
+                    </div>
+                    <div class="text-sm text-gray-300">
+                        <p class="italic">"She manages the inventory."</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/50 rounded-lg p-6">
+                <h4 class="font-semibold text-lg mb-4 text-purple-300">Example Sentences</h4>
+                <div class="space-y-3 text-gray-300">
+                    <p>• Sarah <span class="text-purple-400 font-semibold">manages</span> the drivers at QuickLogistics.</p>
+                    <p>• I <span class="text-purple-400 font-semibold">manage</span> two warehouses in London and Bristol.</p>
+                    <p>• John <span class="text-purple-400 font-semibold">manages</span> all the deliveries for the South region.</p>
+                    <p>• Who <span class="text-purple-400 font-semibold">manages</span> the routes? — Maria <span class="text-purple-400 font-semibold">manages</span> the routes.</p>
+                    <p>• The warehouse supervisor <span class="text-purple-400 font-semibold">manages</span> the inventory and the loading dock.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 26: "Who" Questions -->
+    <section id="slide-26" class="slide">
+        <div class="bg-slate-800/50 backdrop-blur rounded-xl p-8 border border-slate-700">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h2 class="text-3xl font-bold text-purple-400 mb-2">Who Manages What?</h2>
+                    <p class="text-gray-300">Asking and answering questions about management</p>
+                </div>
+                <span class="text-5xl font-bold text-purple-400/20">26/36</span>
+            </div>
+
+            <div class="bg-purple-900/30 border border-purple-500 rounded-lg p-6 mb-8">
+                <h3 class="text-xl font-bold mb-3 text-center">Question Pattern</h3>
+                <div class="text-center text-xl">
+                    <p class="mb-2"><span class="text-yellow-400">Who</span> + <span class="text-green-400">manages</span> + <span class="text-blue-400">object</span> + ?</p>
+                    <p class="text-gray-300 text-lg">→ <span class="text-purple-400">Name</span> + <span class="text-green-400">manages</span> + <span class="text-blue-400">object</span>.</p>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-semibold mb-6 text-center">Meet the QuickLogistics Management Team</h3>
+
+            <div class="grid md:grid-cols-5 gap-4 mb-8">
+                <div class="bg-gradient-to-br from-purple-900 to-purple-800 rounded-lg p-4 border-2 border-purple-600 text-center">
+                    <div class="text-7xl mb-3">👩‍💼</div>
+                    <h4 class="font-bold text-lg mb-2 text-purple-300">Sarah Chen</h4>
+                    <p class="text-sm text-gray-300">Fleet Manager</p>
+                    <div class="mt-3 p-2 bg-purple-950 rounded text-xs text-purple-200">
+                        manages the <span class="font-bold">drivers</span>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-blue-900 to-blue-800 rounded-lg p-4 border-2 border-blue-600 text-center">
+                    <div class="text-7xl mb-3">👨‍💼</div>
+                    <h4 class="font-bold text-lg mb-2 text-blue-300">Tom Williams</h4>
+                    <p class="text-sm text-gray-300">Warehouse Director</p>
+                    <div class="mt-3 p-2 bg-blue-950 rounded text-xs text-blue-200">
+                        manages the <span class="font-bold">warehouses</span>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-green-900 to-green-800 rounded-lg p-4 border-2 border-green-600 text-center">
+                    <div class="text-7xl mb-3">👩‍💼</div>
+                    <h4 class="font-bold text-lg mb-2 text-green-300">Maria Garcia</h4>
+                    <p class="text-sm text-gray-300">Delivery Manager</p>
+                    <div class="mt-3 p-2 bg-green-950 rounded text-xs text-green-200">
+                        manages the <span class="font-bold">deliveries</span>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-yellow-900 to-yellow-800 rounded-lg p-4 border-2 border-yellow-600 text-center">
+                    <div class="text-7xl mb-3">👨‍💼</div>
+                    <h4 class="font-bold text-lg mb-2 text-yellow-300">John Patel</h4>
+                    <p class="text-sm text-gray-300">Route Planner</p>
+                    <div class="mt-3 p-2 bg-yellow-950 rounded text-xs text-yellow-200">
+                        manages the <span class="font-bold">routes</span>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-red-900 to-red-800 rounded-lg p-4 border-2 border-red-600 text-center">
+                    <div class="text-7xl mb-3">👩‍💼</div>
+                    <h4 class="font-bold text-lg mb-2 text-red-300">Lisa Johnson</h4>
+                    <p class="text-sm text-gray-300">Inventory Manager</p>
+                    <div class="mt-3 p-2 bg-red-950 rounded text-xs text-red-200">
+                        manages the <span class="font-bold">inventory</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/50 rounded-lg p-6">
+                <h4 class="font-semibold text-lg mb-4 text-purple-300">Question & Answer Examples</h4>
+                <div class="space-y-4">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-purple-900/30 p-4 rounded-lg border border-purple-500">
+                            <p class="text-yellow-400 font-semibold mb-2">❓ Who manages the drivers?</p>
+                            <p class="text-green-400">✓ Sarah Chen manages the drivers.</p>
+                        </div>
+                        <div class="bg-blue-900/30 p-4 rounded-lg border border-blue-500">
+                            <p class="text-yellow-400 font-semibold mb-2">❓ Who manages the warehouses?</p>
+                            <p class="text-green-400">✓ Tom Williams manages the warehouses.</p>
+                        </div>
+                        <div class="bg-green-900/30 p-4 rounded-lg border border-green-500">
+                            <p class="text-yellow-400 font-semibold mb-2">❓ Who manages the deliveries?</p>
+                            <p class="text-green-400">✓ Maria Garcia manages the deliveries.</p>
+                        </div>
+                        <div class="bg-yellow-900/30 p-4 rounded-lg border border-yellow-500">
+                            <p class="text-yellow-400 font-semibold mb-2">❓ Who manages the routes?</p>
+                            <p class="text-green-400">✓ John Patel manages the routes.</p>
+                        </div>
+                        <div class="bg-red-900/30 p-4 rounded-lg border border-red-500">
+                            <p class="text-yellow-400 font-semibold mb-2">❓ Who manages the inventory?</p>
+                            <p class="text-green-400">✓ Lisa Johnson manages the inventory.</p>
+                        </div>
+                        <div class="bg-slate-700 p-4 rounded-lg border border-slate-500">
+                            <p class="text-yellow-400 font-semibold mb-2">❓ What does Sarah manage?</p>
+                            <p class="text-green-400">✓ Sarah manages the drivers.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 27: Training Exercise 1 -->
+    <section id="slide-27" class="slide">
+        <div class="bg-slate-800/50 backdrop-blur rounded-xl p-8 border border-slate-700">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h2 class="text-3xl font-bold text-purple-400 mb-2">Training Exercise 1</h2>
+                    <p class="text-gray-300">Match the managers to what they manage</p>
+                </div>
+                <span class="text-5xl font-bold text-purple-400/20">27/36</span>
+            </div>
+
+            <div class="bg-purple-900/20 border border-purple-500 rounded-lg p-4 mb-6">
+                <p class="text-center text-lg">
+                    <span class="text-purple-400 font-semibold">Instructions:</span> Click on a manager name, then click on what they manage to make a match.
+                </p>
+            </div>
+
+            <div class="mb-6 flex gap-4 justify-center">
+                <button id="check-match-btn" class="px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition">
+                    ✓ Check Answers
+                </button>
+                <button id="reset-match-btn" class="px-6 py-3 bg-slate-600 hover:bg-slate-700 rounded-lg font-semibold transition">
+                    ↺ Reset
+                </button>
+                <div id="match-score" class="hidden flex items-center gap-2 px-4 py-3 bg-slate-700 rounded-lg">
+                    <span class="text-green-400">Score:</span>
+                    <span id="match-score-value" class="font-bold">0/5</span>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-purple-300 text-center">Managers</h3>
+                    <div class="space-y-3" id="managers-list">
+                        <div class="vocab-card bg-slate-900 p-4 rounded-lg border-2 border-slate-700 text-center cursor-pointer" data-id="sarah" data-type="manager">
+                            <span class="text-lg">👩‍💼 Sarah Chen</span>
+                        </div>
+                        <div class="vocab-card bg-slate-900 p-4 rounded-lg border-2 border-slate-700 text-center cursor-pointer" data-id="tom" data-type="manager">
+                            <span class="text-lg">👨‍💼 Tom Williams</span>
+                        </div>
+                        <div class="vocab-card bg-slate-900 p-4 rounded-lg border-2 border-slate-700 text-center cursor-pointer" data-id="maria" data-type="manager">
+                            <span class="text-lg">👩‍💼 Maria Garcia</span>
+                        </div>
+                        <div class="vocab-card bg-slate-900 p-4 rounded-lg border-2 border-slate-700 text-center cursor-pointer" data-id="john" data-type="manager">
+                            <span class="text-lg">👨‍💼 John Patel</span>
+                        </div>
+                        <div class="vocab-card bg-slate-900 p-4 rounded-lg border-2 border-slate-700 text-center cursor-pointer" data-id="lisa" data-type="manager">
+                            <span class="text-lg">👩‍💼 Lisa Johnson</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-purple-300 text-center">What They Manage</h3>
+                    <div class="space-y-3" id="objects-list">
+                        <div class="vocab-card bg-slate-900 p-4 rounded-lg border-2 border-slate-700 text-center cursor-pointer" data-id="drivers" data-type="object">
+                            <span class="text-lg">👥 the drivers</span>
+                        </div>
+                        <div class="vocab-card bg-slate-900 p-4 rounded-lg border-2 border-slate-700 text-center cursor-pointer" data-id="warehouses" data-type="object">
+                            <span class="text-lg">🏭 the warehouses</span>
+                        </div>
+                        <div class="vocab-card bg-slate-900 p-4 rounded-lg border-2 border-slate-700 text-center cursor-pointer" data-id="deliveries" data-type="object">
+                            <span class="text-lg">📦 the deliveries</span>
+                        </div>
+                        <div class="vocab-card bg-slate-900 p-4 rounded-lg border-2 border-slate-700 text-center cursor-pointer" data-id="routes" data-type="object">
+                            <span class="text-lg">🗺️ the routes</span>
+                        </div>
+                        <div class="vocab-card bg-slate-900 p-4 rounded-lg border-2 border-slate-700 text-center cursor-pointer" data-id="inventory" data-type="object">
+                            <span class="text-lg">📊 the inventory</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 bg-slate-900/50 rounded-lg p-4 text-sm text-gray-400">
+                <p class="text-center italic">Hint: Look back at slide 26 if you need help!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 28: Training Exercise 2 -->
+    <section id="slide-28" class="slide">
+        <div class="bg-slate-800/50 backdrop-blur rounded-xl p-8 border border-slate-700">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h2 class="text-3xl font-bold text-purple-400 mb-2">Training Exercise 2</h2>
+                    <p class="text-gray-300">Complete the sentences with "manage" or "manages"</p>
+                </div>
+                <span class="text-5xl font-bold text-purple-400/20">28/36</span>
+            </div>
+
+            <div class="bg-purple-900/20 border border-purple-500 rounded-lg p-4 mb-6">
+                <p class="text-center text-lg">
+                    <span class="text-purple-400 font-semibold">Remember:</span>
+                    <span class="text-green-400">I/You/We/They → manage</span> |
+                    <span class="text-blue-400">He/She/It/Name → manages</span>
+                </p>
+            </div>
+
+            <div class="mb-6 flex justify-center">
+                <button id="check-grammar-btn" class="px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition">
+                    ✓ Check Answers
+                </button>
+            </div>
+
+            <div class="space-y-4" id="grammar-exercises">
+                <div class="bg-slate-900/50 p-5 rounded-lg">
+                    <p class="text-lg mb-3">1. Sarah Chen <input type="text" class="question-input bg-slate-800 border border-slate-600 rounded px-3 py-2 w-32 text-white mx-2" data-answer="manages"> the drivers.</p>
+                </div>
+
+                <div class="bg-slate-900/50 p-5 rounded-lg">
+                    <p class="text-lg mb-3">2. I <input type="text" class="question-input bg-slate-800 border border-slate-600 rounded px-3 py-2 w-32 text-white mx-2" data-answer="manage"> three warehouses in London.</p>
+                </div>
+
+                <div class="bg-slate-900/50 p-5 rounded-lg">
+                    <p class="text-lg mb-3">3. Who <input type="text" class="question-input bg-slate-800 border border-slate-600 rounded px-3 py-2 w-32 text-white mx-2" data-answer="manages"> all the deliveries? — Maria <input type="text" class="question-input bg-slate-800 border border-slate-600 rounded px-3 py-2 w-32 text-white mx-2" data-answer="manages"> all the deliveries.</p>
+                </div>
+
+                <div class="bg-slate-900/50 p-5 rounded-lg">
+                    <p class="text-lg mb-3">4. Tom and I <input type="text" class="question-input bg-slate-800 border border-slate-600 rounded px-3 py-2 w-32 text-white mx-2" data-answer="manage"> the inventory system together.</p>
+                </div>
+
+                <div class="bg-slate-900/50 p-5 rounded-lg">
+                    <p class="text-lg mb-3">5. Does John <input type="text" class="question-input bg-slate-800 border border-slate-600 rounded px-3 py-2 w-32 text-white mx-2" data-answer="manage"> the routes? — Yes, he does.</p>
+                </div>
+
+                <div class="bg-slate-900/50 p-5 rounded-lg">
+                    <p class="text-lg mb-3">6. The warehouse supervisors <input type="text" class="question-input bg-slate-800 border border-slate-600 rounded px-3 py-2 w-32 text-white mx-2" data-answer="manage"> the loading dock operations.</p>
+                </div>
+
+                <div class="bg-slate-900/50 p-5 rounded-lg">
+                    <p class="text-lg mb-3">7. Lisa <input type="text" class="question-input bg-slate-800 border border-slate-600 rounded px-3 py-2 w-32 text-white mx-2" data-answer="manages"> the inventory, and Tom <input type="text" class="question-input bg-slate-800 border border-slate-600 rounded px-3 py-2 w-32 text-white mx-2" data-answer="manages"> the warehouses.</p>
+                </div>
+
+                <div class="bg-slate-900/50 p-5 rounded-lg">
+                    <p class="text-lg mb-3">8. We <input type="text" class="question-input bg-slate-800 border border-slate-600 rounded px-3 py-2 w-32 text-white mx-2" data-answer="manage"> 50 drivers and 30 vehicles.</p>
+                </div>
+
+                <div class="bg-slate-900/50 p-5 rounded-lg">
+                    <p class="text-lg mb-3">9. What does Maria <input type="text" class="question-input bg-slate-800 border border-slate-600 rounded px-3 py-2 w-32 text-white mx-2" data-answer="manage">? — She <input type="text" class="question-input bg-slate-800 border border-slate-600 rounded px-3 py-2 w-32 text-white mx-2" data-answer="manages"> the deliveries.</p>
+                </div>
+
+                <div class="bg-slate-900/50 p-5 rounded-lg">
+                    <p class="text-lg mb-3">10. Do you <input type="text" class="question-input bg-slate-800 border border-slate-600 rounded px-3 py-2 w-32 text-white mx-2" data-answer="manage"> the routes? — No, I don't. John <input type="text" class="question-input bg-slate-800 border border-slate-600 rounded px-3 py-2 w-32 text-white mx-2" data-answer="manages"> them.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 29: Picture Puzzle Production -->
+    <section id="slide-29" class="slide">
+        <div class="bg-slate-800/50 backdrop-blur rounded-xl p-8 border border-slate-700">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h2 class="text-3xl font-bold text-purple-400 mb-2">Picture Puzzle: Organization Chart</h2>
+                    <p class="text-gray-300">Read the story and answer the questions</p>
+                </div>
+                <span class="text-5xl font-bold text-purple-400/20">29/36</span>
+            </div>
+
+            <div class="bg-gradient-to-br from-purple-900/40 to-blue-900/40 rounded-xl p-6 mb-6 border-2 border-purple-500">
+                <h3 class="text-2xl font-bold mb-4 text-center text-purple-300">QuickLogistics Management Structure</h3>
+
+                <div class="flex justify-center mb-6">
+                    <div class="text-center">
+                        <div class="bg-purple-700 rounded-lg p-4 mb-2 border-2 border-purple-400">
+                            <div class="text-6xl mb-2">👔</div>
+                            <p class="font-bold text-lg">David Thompson</p>
+                            <p class="text-sm text-purple-200">Operations Director</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-center mb-4">
+                    <div class="w-px h-12 bg-slate-400"></div>
+                </div>
+
+                <div class="grid grid-cols-5 gap-4">
+                    <div class="text-center">
+                        <div class="bg-purple-800 rounded-lg p-3 border-2 border-purple-500">
+                            <div class="text-5xl mb-2">👩‍💼</div>
+                            <p class="font-bold">Sarah Chen</p>
+                            <p class="text-xs text-purple-200">Fleet Manager</p>
+                        </div>
+                        <div class="mt-2 text-sm bg-purple-900 rounded p-2 text-purple-300">
+                            manages<br><span class="font-bold">drivers</span>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="bg-blue-800 rounded-lg p-3 border-2 border-blue-500">
+                            <div class="text-5xl mb-2">👨‍💼</div>
+                            <p class="font-bold">Tom Williams</p>
+                            <p class="text-xs text-blue-200">Warehouse Director</p>
+                        </div>
+                        <div class="mt-2 text-sm bg-blue-900 rounded p-2 text-blue-300">
+                            manages<br><span class="font-bold">warehouses</span>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="bg-green-800 rounded-lg p-3 border-2 border-green-500">
+                            <div class="text-5xl mb-2">👩‍💼</div>
+                            <p class="font-bold">Maria Garcia</p>
+                            <p class="text-xs text-green-200">Delivery Manager</p>
+                        </div>
+                        <div class="mt-2 text-sm bg-green-900 rounded p-2 text-green-300">
+                            manages<br><span class="font-bold">deliveries</span>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="bg-yellow-800 rounded-lg p-3 border-2 border-yellow-500">
+                            <div class="text-5xl mb-2">👨‍💼</div>
+                            <p class="font-bold">John Patel</p>
+                            <p class="text-xs text-yellow-200">Route Planner</p>
+                        </div>
+                        <div class="mt-2 text-sm bg-yellow-900 rounded p-2 text-yellow-300">
+                            manages<br><span class="font-bold">routes</span>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="bg-red-800 rounded-lg p-3 border-2 border-red-500">
+                            <div class="text-5xl mb-2">👩‍💼</div>
+                            <p class="font-bold">Lisa Johnson</p>
+                            <p class="text-xs text-red-200">Inventory Manager</p>
+                        </div>
+                        <div class="mt-2 text-sm bg-red-900 rounded p-2 text-red-300">
+                            manages<br><span class="font-bold">inventory</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/50 rounded-lg p-6 mb-6">
+                <h4 class="font-semibold text-lg mb-3 text-purple-300">The Story</h4>
+                <p class="text-gray-300 leading-relaxed">
+                    David Thompson is the Operations Director at QuickLogistics. He manages five department heads.
+                    Sarah Chen is the Fleet Manager, and she manages all 15 drivers. Tom Williams is the Warehouse Director,
+                    and he manages three warehouses in London, Bristol, and Manchester. Maria Garcia is the Delivery Manager,
+                    and she manages all the deliveries — about 200 shipments every day. John Patel is the Route Planner,
+                    and he manages 45 different routes across the UK. Finally, Lisa Johnson is the Inventory Manager,
+                    and she manages the inventory system for all three warehouses. Together, they make QuickLogistics successful!
+                </p>
+            </div>
+
+            <div class="space-y-4">
+                <h4 class="font-semibold text-lg text-purple-300">Answer these questions:</h4>
+
+                <div class="bg-slate-900/50 p-4 rounded-lg">
+                    <p class="font-semibold mb-2">1. Who manages the drivers?</p>
+                    <input type="text" class="question-input w-full bg-slate-800 border border-slate-600 rounded-lg p-3 text-white" placeholder="Your answer...">
+                </div>
+
+                <div class="bg-slate-900/50 p-4 rounded-lg">
+                    <p class="font-semibold mb-2">2. What does Tom Williams manage?</p>
+                    <input type="text" class="question-input w-full bg-slate-800 border border-slate-600 rounded-lg p-3 text-white" placeholder="Your answer...">
+                </div>
+
+                <div class="bg-slate-900/50 p-4 rounded-lg">
+                    <p class="font-semibold mb-2">3. How many routes does John Patel manage?</p>
+                    <input type="text" class="question-input w-full bg-slate-800 border border-slate-600 rounded-lg p-3 text-white" placeholder="Your answer...">
+                </div>
+
+                <div class="bg-slate-900/50 p-4 rounded-lg">
+                    <p class="font-semibold mb-2">4. Who manages the inventory?</p>
+                    <input type="text" class="question-input w-full bg-slate-800 border border-slate-600 rounded-lg p-3 text-white" placeholder="Your answer...">
+                </div>
+
+                <div class="bg-slate-900/50 p-4 rounded-lg">
+                    <p class="font-semibold mb-2">5. What is David Thompson's job title?</p>
+                    <input type="text" class="question-input w-full bg-slate-800 border border-slate-600 rounded-lg p-3 text-white" placeholder="Your answer...">
+                </div>
+
+                <div class="bg-slate-900/50 p-4 rounded-lg">
+                    <p class="font-semibold mb-2">6. Who manages all the deliveries?</p>
+                    <input type="text" class="question-input w-full bg-slate-800 border border-slate-600 rounded-lg p-3 text-white" placeholder="Your answer...">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 30: Listening Comprehension (INTEGRATION) -->
+    <section id="slide-30" class="slide">
+        <div class="bg-slate-800/50 backdrop-blur rounded-xl p-8 border border-slate-700">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h2 class="text-3xl font-bold text-green-400 mb-2">🎧 Listening Comprehension</h2>
+                    <p class="text-gray-300">Integration: N1 + N2 + N3 + N4</p>
+                </div>
+                <span class="text-5xl font-bold text-green-400/20">30/36</span>
+            </div>
+
+            <div class="bg-green-900/20 border-2 border-green-500 rounded-lg p-6 mb-6">
+                <p class="text-center text-lg font-semibold text-green-300">
+                    ⚠️ CRITICAL INTEGRATION SECTION — This dialogue uses ALL vocabulary and grammar from N1, N2, N3, and N4
+                </p>
+            </div>
+
+            <div class="audio-player rounded-xl p-6 mb-6 text-center">
+                <div class="text-7xl mb-4">🎙️</div>
+                <h3 class="text-2xl font-bold mb-4">First Day at QuickLogistics</h3>
+                <p class="text-sm mb-6 text-purple-200">A conversation between Sarah (Fleet Manager) and Tom (new Warehouse Supervisor)</p>
+
+                <div class="bg-black/30 rounded-lg p-4 mb-4">
+                    <button id="play-dialogue-btn" class="px-8 py-4 bg-white text-purple-900 font-bold rounded-lg hover:bg-purple-100 transition text-lg">
+                        ▶ Play Dialogue (2:15)
+                    </button>
+                </div>
+
+                <p class="text-xs text-purple-200 italic">📝 Listen 2-3 times before attempting the exercises</p>
+            </div>
+
+            <div class="bg-slate-900/70 rounded-lg p-6 mb-6">
+                <h4 class="font-semibold text-lg mb-4 text-purple-300">📄 Dialogue Transcript</h4>
+                <div class="space-y-3 text-gray-300 text-sm leading-relaxed max-h-96 overflow-y-auto">
+                    <p><strong class="text-purple-400">SARAH:</strong> Hi! Welcome to QuickLogistics! I'm Sarah Chen. I manage the drivers and the fleet.</p>
+
+                    <p><strong class="text-blue-400">TOM:</strong> Nice to meet you, Sarah! I'm Tom Williams, the new Warehouse Supervisor. This is my first day!</p>
+
+                    <p><strong class="text-purple-400">SARAH:</strong> Welcome aboard! So, do you know much about our company?</p>
+
+                    <p><strong class="text-blue-400">TOM:</strong> Not really. What does QuickLogistics have?</p>
+
+                    <p><strong class="text-purple-400">SARAH:</strong> Well, we have a big fleet. We have 25 vans for local deliveries in London, and we have 18 lorries for long-distance routes.</p>
+
+                    <p><strong class="text-blue-400">TOM:</strong> That's impressive! Do the lorries have trailers?</p>
+
+                    <p><strong class="text-purple-400">SARAH:</strong> Some do, some don't. Ten lorries have trailers, but eight lorries don't have trailers. The ones with trailers handle the big shipments.</p>
+
+                    <p><strong class="text-blue-400">TOM:</strong> I see. And how many warehouses do we have?</p>
+
+                    <p><strong class="text-purple-400">SARAH:</strong> We have three warehouses — one here in London, one in Bristol, and one in Manchester. The London warehouse is the biggest. It has 12 forklifts and about 300 pallets.</p>
+
+                    <p><strong class="text-blue-400">TOM:</strong> Does it have a conveyor belt?</p>
+
+                    <p><strong class="text-purple-400">SARAH:</strong> No, it doesn't have a conveyor belt yet, but we're planning to install one next month. The Bristol warehouse has a conveyor belt, and it works very well.</p>
+
+                    <p><strong class="text-blue-400">TOM:</strong> What about scanners? Do we have scanners for the inventory system?</p>
+
+                    <p><strong class="text-purple-400">SARAH:</strong> Yes, we do! We have 20 scanners. Each warehouse has scanners, and all the drivers have scanners too for the deliveries.</p>
+
+                    <p><strong class="text-blue-400">TOM:</strong> That's good. And what about the loading dock? Does the London warehouse have a loading dock?</p>
+
+                    <p><strong class="text-purple-400">SARAH:</strong> Yes, it does. It has two loading docks, but Manchester only has one loading dock. Bristol has three loading docks because it's our busiest location.</p>
+
+                    <p><strong class="text-blue-400">TOM:</strong> Interesting! So who manages all the deliveries?</p>
+
+                    <p><strong class="text-purple-400">SARAH:</strong> Maria Garcia manages all the deliveries. She's really organized. She manages about 200 shipments every day!</p>
+
+                    <p><strong class="text-blue-400">TOM:</strong> Wow! And who manages the routes?</p>
+
+                    <p><strong class="text-purple-400">SARAH:</strong> John Patel manages the routes. He's brilliant. He plans 45 different routes, and he uses special software. We have short routes for the vans and long routes for the lorries.</p>
+
+                    <p><strong class="text-blue-400">TOM:</strong> Do the vans and lorries use the same routes?</p>
+
+                    <p><strong class="text-purple-400">SARAH:</strong> No, they don't. Vans have local routes in the city, and lorries have national routes. Some vehicles have fixed routes, but some vehicles don't have fixed routes.</p>
+
+                    <p><strong class="text-blue-400">TOM:</strong> I understand. And what about the inventory? Who manages that?</p>
+
+                    <p><strong class="text-purple-400">SARAH:</strong> Lisa Johnson manages the inventory for all three warehouses. She uses the scanners and a computer system. She's very good!</p>
+
+                    <p><strong class="text-blue-400">TOM:</strong> This is so helpful! And you manage the drivers, right?</p>
+
+                    <p><strong class="text-purple-400">SARAH:</strong> Yes, I manage 15 drivers. Some drivers work with vans, and some drivers work with lorries. We also have three drivers with trailers.</p>
+
+                    <p><strong class="text-blue-400">TOM:</strong> Do all drivers work every day?</p>
+
+                    <p><strong class="text-purple-400">SARAH:</strong> No, they don't. We have different shifts. Some drivers work Monday to Friday, and some drivers work weekends too. It depends on the deliveries.</p>
+
+                    <p><strong class="text-blue-400">TOM:</strong> Perfect! Thank you so much for explaining everything, Sarah!</p>
+
+                    <p><strong class="text-purple-400">SARAH:</strong> You're welcome, Tom! Good luck with the warehouses. If you need anything, just ask!</p>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Task 1: True/False -->
+                <div class="bg-slate-900/50 rounded-lg p-6">
+                    <h4 class="font-semibold text-xl mb-4 text-green-300">Task 1: True or False? (8 questions)</h4>
+                    <div class="space-y-3" id="lc-true-false">
+                        <div class="flex items-center justify-between bg-slate-800 p-3 rounded">
+                            <span>1. Sarah manages the warehouses.</span>
+                            <div class="flex gap-2">
+                                <button class="tf-btn px-4 py-1 bg-slate-700 hover:bg-green-600 rounded text-sm">True</button>
+                                <button class="tf-btn px-4 py-1 bg-slate-700 hover:bg-red-600 rounded text-sm">False</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-800 p-3 rounded">
+                            <span>2. QuickLogistics has 25 vans and 18 lorries.</span>
+                            <div class="flex gap-2">
+                                <button class="tf-btn px-4 py-1 bg-slate-700 hover:bg-green-600 rounded text-sm">True</button>
+                                <button class="tf-btn px-4 py-1 bg-slate-700 hover:bg-red-600 rounded text-sm">False</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-800 p-3 rounded">
+                            <span>3. All lorries have trailers.</span>
+                            <div class="flex gap-2">
+                                <button class="tf-btn px-4 py-1 bg-slate-700 hover:bg-green-600 rounded text-sm">True</button>
+                                <button class="tf-btn px-4 py-1 bg-slate-700 hover:bg-red-600 rounded text-sm">False</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-800 p-3 rounded">
+                            <span>4. The London warehouse has a conveyor belt.</span>
+                            <div class="flex gap-2">
+                                <button class="tf-btn px-4 py-1 bg-slate-700 hover:bg-green-600 rounded text-sm">True</button>
+                                <button class="tf-btn px-4 py-1 bg-slate-700 hover:bg-red-600 rounded text-sm">False</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-800 p-3 rounded">
+                            <span>5. Maria Garcia manages the routes.</span>
+                            <div class="flex gap-2">
+                                <button class="tf-btn px-4 py-1 bg-slate-700 hover:bg-green-600 rounded text-sm">True</button>
+                                <button class="tf-btn px-4 py-1 bg-slate-700 hover:bg-red-600 rounded text-sm">False</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-800 p-3 rounded">
+                            <span>6. John Patel plans 45 different routes.</span>
+                            <div class="flex gap-2">
+                                <button class="tf-btn px-4 py-1 bg-slate-700 hover:bg-green-600 rounded text-sm">True</button>
+                                <button class="tf-btn px-4 py-1 bg-slate-700 hover:bg-red-600 rounded text-sm">False</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-800 p-3 rounded">
+                            <span>7. Vans and lorries use the same routes.</span>
+                            <div class="flex gap-2">
+                                <button class="tf-btn px-4 py-1 bg-slate-700 hover:bg-green-600 rounded text-sm">True</button>
+                                <button class="tf-btn px-4 py-1 bg-slate-700 hover:bg-red-600 rounded text-sm">False</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-800 p-3 rounded">
+                            <span>8. All drivers work Monday to Friday.</span>
+                            <div class="flex gap-2">
+                                <button class="tf-btn px-4 py-1 bg-slate-700 hover:bg-green-600 rounded text-sm">True</button>
+                                <button class="tf-btn px-4 py-1 bg-slate-700 hover:bg-red-600 rounded text-sm">False</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task 2: Fill the Gaps -->
+                <div class="bg-slate-900/50 rounded-lg p-6">
+                    <h4 class="font-semibold text-xl mb-4 text-green-300">Task 2: Fill the Gaps (5 sentences)</h4>
+                    <div class="space-y-4">
+                        <div class="bg-slate-800 p-4 rounded">
+                            <p>1. QuickLogistics has 25 <input type="text" class="question-input bg-slate-700 border border-slate-600 rounded px-3 py-1 w-32 text-white mx-1"> and 18 <input type="text" class="question-input bg-slate-700 border border-slate-600 rounded px-3 py-1 w-32 text-white mx-1">.</p>
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded">
+                            <p>2. The London warehouse has 12 <input type="text" class="question-input bg-slate-700 border border-slate-600 rounded px-3 py-1 w-32 text-white mx-1"> and 300 <input type="text" class="question-input bg-slate-700 border border-slate-600 rounded px-3 py-1 w-32 text-white mx-1">.</p>
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded">
+                            <p>3. Maria Garcia <input type="text" class="question-input bg-slate-700 border border-slate-600 rounded px-3 py-1 w-32 text-white mx-1"> all the <input type="text" class="question-input bg-slate-700 border border-slate-600 rounded px-3 py-1 w-32 text-white mx-1">.</p>
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded">
+                            <p>4. The company has 20 <input type="text" class="question-input bg-slate-700 border border-slate-600 rounded px-3 py-1 w-32 text-white mx-1"> for the inventory system.</p>
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded">
+                            <p>5. Ten lorries <input type="text" class="question-input bg-slate-700 border border-slate-600 rounded px-3 py-1 w-32 text-white mx-1"> trailers, but eight lorries <input type="text" class="question-input bg-slate-700 border border-slate-600 rounded px-3 py-1 w-40 text-white mx-1"> trailers.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task 3: Answer Questions -->
+                <div class="bg-slate-900/50 rounded-lg p-6">
+                    <h4 class="font-semibold text-xl mb-4 text-green-300">Task 3: Answer the Questions (5 questions)</h4>
+                    <div class="space-y-4">
+                        <div class="bg-slate-800 p-4 rounded">
+                            <p class="font-semibold mb-2">1. What does Sarah manage?</p>
+                            <input type="text" class="question-input w-full bg-slate-700 border border-slate-600 rounded-lg p-2 text-white" placeholder="Your answer...">
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded">
+                            <p class="font-semibold mb-2">2. How many warehouses does QuickLogistics have?</p>
+                            <input type="text" class="question-input w-full bg-slate-700 border border-slate-600 rounded-lg p-2 text-white" placeholder="Your answer...">
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded">
+                            <p class="font-semibold mb-2">3. Does the London warehouse have a conveyor belt?</p>
+                            <input type="text" class="question-input w-full bg-slate-700 border border-slate-600 rounded-lg p-2 text-white" placeholder="Your answer...">
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded">
+                            <p class="font-semibold mb-2">4. Who manages the routes?</p>
+                            <input type="text" class="question-input w-full bg-slate-700 border border-slate-600 rounded-lg p-2 text-white" placeholder="Your answer...">
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded">
+                            <p class="font-semibold mb-2">5. Do vans and lorries use the same routes?</p>
+                            <input type="text" class="question-input w-full bg-slate-700 border border-slate-600 rounded-lg p-2 text-white" placeholder="Your answer...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 31: Reading Comprehension - Text -->
+    <section id="slide-31" class="slide">
+        <div class="bg-slate-800/50 backdrop-blur rounded-xl p-8 border border-slate-700">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h2 class="text-3xl font-bold text-blue-400 mb-2">📄 Reading Comprehension (Part 1)</h2>
+                    <p class="text-gray-300">Integration: Read the Operations Report</p>
+                </div>
+                <span class="text-5xl font-bold text-blue-400/20">31/36</span>
+            </div>
+
+            <div class="bg-blue-900/20 border-2 border-blue-500 rounded-lg p-6 mb-6">
+                <p class="text-center text-lg font-semibold text-blue-300">
+                    ⚠️ CRITICAL INTEGRATION SECTION — This report uses ALL vocabulary and grammar from N1, N2, N3, and N4
+                </p>
+            </div>
+
+            <div class="report-paper text-slate-900 rounded-xl p-8 shadow-2xl max-w-4xl mx-auto border-4 border-slate-300">
+                <div class="border-b-2 border-slate-300 pb-4 mb-6">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-3xl font-bold text-slate-800 mb-2">QuickLogistics Ltd.</h3>
+                            <p class="text-sm text-slate-600">Monthly Operations Report</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm text-slate-600">Report Period:</p>
+                            <p class="font-bold">November 2024</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-5 leading-relaxed">
+                    <div>
+                        <h4 class="text-xl font-bold text-slate-800 mb-3 border-b border-slate-300 pb-1">📊 Fleet Overview</h4>
+                        <p class="text-slate-700">
+                            QuickLogistics operates a modern fleet of delivery vehicles across the United Kingdom.
+                            The company has 25 vans for local city deliveries and 18 lorries for long-distance transportation.
+                            Ten lorries have heavy-duty trailers for large shipments, but eight lorries don't have trailers
+                            because they handle smaller regional routes. All vehicles are less than five years old, and
+                            the fleet manager, Sarah Chen, manages 15 professional drivers. Some drivers specialize in van
+                            operations, and some drivers specialize in lorry operations with trailers.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h4 class="text-xl font-bold text-slate-800 mb-3 border-b border-slate-300 pb-1">🏭 Warehouse Facilities</h4>
+                        <p class="text-slate-700">
+                            The company has three warehouse facilities in strategic locations. The London warehouse is the
+                            largest facility. It has 12 forklifts, 300 wooden pallets, and two loading docks for efficient
+                            operations. However, the London warehouse doesn't have a conveyor belt yet — the management plans
+                            to install one in December 2024. The Bristol warehouse has a modern conveyor belt system and three
+                            loading docks, making it the busiest location. The Manchester warehouse has one loading dock and
+                            basic equipment. Tom Williams, the Warehouse Director, manages all three warehouses. Each warehouse
+                            has scanners for inventory tracking, and the company has 20 scanners in total.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h4 class="text-xl font-bold text-slate-800 mb-3 border-b border-slate-300 pb-1">📦 Delivery Operations</h4>
+                        <p class="text-slate-700">
+                            Maria Garcia manages all delivery operations at QuickLogistics. She coordinates approximately
+                            200 shipments every day. The company has both express deliveries and standard deliveries.
+                            Express deliveries use vans with dedicated city routes, and standard deliveries use lorries
+                            with national routes. John Patel manages 45 different routes using specialized route-planning
+                            software. Vans have short local routes in cities like London, Bristol, and Manchester, but
+                            lorries have long national routes that connect major distribution centers. Some vehicles have
+                            fixed daily routes, but some vehicles don't have fixed routes because delivery demands change.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h4 class="text-xl font-bold text-slate-800 mb-3 border-b border-slate-300 pb-1">📊 Inventory Management</h4>
+                        <p class="text-slate-700">
+                            Lisa Johnson manages the inventory system for all warehouse locations. She uses barcode scanners
+                            and an integrated computer system to track thousands of products. The system monitors pallet
+                            locations, shipment status, and delivery schedules in real-time. Each loading dock has dedicated
+                            scanners, and all drivers have mobile scanners for on-the-go updates. The inventory system
+                            connects to the route planning software, so managers can optimize deliveries based on stock levels.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h4 class="text-xl font-bold text-slate-800 mb-3 border-b border-slate-300 pb-1">✅ Summary</h4>
+                        <p class="text-slate-700">
+                            QuickLogistics has a strong operational foundation with modern vehicles, well-equipped warehouses,
+                            efficient delivery systems, and skilled management. The company doesn't have conveyor belts in
+                            all warehouses yet, but the Bristol facility demonstrates the benefits of automation. The management
+                            team — Sarah, Tom, Maria, John, and Lisa — work together to ensure smooth daily operations and
+                            excellent customer service.
+                        </p>
+                    </div>
+
+                    <div class="border-t-2 border-slate-300 pt-4 mt-6">
+                        <p class="text-sm text-slate-600 italic">
+                            Prepared by: Operations Department<br>
+                            Distribution: All Department Heads<br>
+                            Next Review: December 2024
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 text-center">
+                <p class="text-gray-400 text-sm italic">📖 Read carefully 2-3 times before answering questions on the next slide</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 32: Reading Comprehension - Questions -->
+    <section id="slide-32" class="slide">
+        <div class="bg-slate-800/50 backdrop-blur rounded-xl p-8 border border-slate-700">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h2 class="text-3xl font-bold text-blue-400 mb-2">📄 Reading Comprehension (Part 2)</h2>
+                    <p class="text-gray-300">Answer questions about the Operations Report</p>
+                </div>
+                <span class="text-5xl font-bold text-blue-400/20">32/36</span>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Task 1: True/False/Not Mentioned -->
+                <div class="bg-slate-900/50 rounded-lg p-6">
+                    <h4 class="font-semibold text-xl mb-4 text-blue-300">Task 1: True, False, or Not Mentioned? (8 questions)</h4>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between bg-slate-800 p-3 rounded">
+                            <span>1. QuickLogistics has 25 vans and 18 lorries.</span>
+                            <div class="flex gap-2">
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-green-600 rounded text-xs">True</button>
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-red-600 rounded text-xs">False</button>
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-yellow-600 rounded text-xs">Not Mentioned</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-800 p-3 rounded">
+                            <span>2. All lorries have trailers.</span>
+                            <div class="flex gap-2">
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-green-600 rounded text-xs">True</button>
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-red-600 rounded text-xs">False</button>
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-yellow-600 rounded text-xs">Not Mentioned</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-800 p-3 rounded">
+                            <span>3. The London warehouse has a conveyor belt.</span>
+                            <div class="flex gap-2">
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-green-600 rounded text-xs">True</button>
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-red-600 rounded text-xs">False</button>
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-yellow-600 rounded text-xs">Not Mentioned</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-800 p-3 rounded">
+                            <span>4. Bristol is the busiest warehouse location.</span>
+                            <div class="flex gap-2">
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-green-600 rounded text-xs">True</button>
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-red-600 rounded text-xs">False</button>
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-yellow-600 rounded text-xs">Not Mentioned</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-800 p-3 rounded">
+                            <span>5. All vehicles are less than three years old.</span>
+                            <div class="flex gap-2">
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-green-600 rounded text-xs">True</button>
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-red-600 rounded text-xs">False</button>
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-yellow-600 rounded text-xs">Not Mentioned</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-800 p-3 rounded">
+                            <span>6. Maria Garcia manages about 200 shipments every day.</span>
+                            <div class="flex gap-2">
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-green-600 rounded text-xs">True</button>
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-red-600 rounded text-xs">False</button>
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-yellow-600 rounded text-xs">Not Mentioned</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-800 p-3 rounded">
+                            <span>7. Vans and lorries use the same routes.</span>
+                            <div class="flex gap-2">
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-green-600 rounded text-xs">True</button>
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-red-600 rounded text-xs">False</button>
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-yellow-600 rounded text-xs">Not Mentioned</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-800 p-3 rounded">
+                            <span>8. The company has 20 scanners in total.</span>
+                            <div class="flex gap-2">
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-green-600 rounded text-xs">True</button>
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-red-600 rounded text-xs">False</button>
+                                <button class="tfn-btn px-3 py-1 bg-slate-700 hover:bg-yellow-600 rounded text-xs">Not Mentioned</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task 2: Answer Questions -->
+                <div class="bg-slate-900/50 rounded-lg p-6">
+                    <h4 class="font-semibold text-xl mb-4 text-blue-300">Task 2: Answer the Questions (8 questions)</h4>
+                    <div class="space-y-4">
+                        <div class="bg-slate-800 p-4 rounded">
+                            <p class="font-semibold mb-2">1. Who manages the drivers?</p>
+                            <input type="text" class="question-input w-full bg-slate-700 border border-slate-600 rounded-lg p-2 text-white" placeholder="Your answer...">
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded">
+                            <p class="font-semibold mb-2">2. How many forklifts does the London warehouse have?</p>
+                            <input type="text" class="question-input w-full bg-slate-700 border border-slate-600 rounded-lg p-2 text-white" placeholder="Your answer...">
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded">
+                            <p class="font-semibold mb-2">3. Does the London warehouse have a conveyor belt?</p>
+                            <input type="text" class="question-input w-full bg-slate-700 border border-slate-600 rounded-lg p-2 text-white" placeholder="Your answer...">
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded">
+                            <p class="font-semibold mb-2">4. Which warehouse has three loading docks?</p>
+                            <input type="text" class="question-input w-full bg-slate-700 border border-slate-600 rounded-lg p-2 text-white" placeholder="Your answer...">
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded">
+                            <p class="font-semibold mb-2">5. Who manages the routes? How many routes does he manage?</p>
+                            <input type="text" class="question-input w-full bg-slate-700 border border-slate-600 rounded-lg p-2 text-white" placeholder="Your answer...">
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded">
+                            <p class="font-semibold mb-2">6. What does Lisa Johnson manage?</p>
+                            <input type="text" class="question-input w-full bg-slate-700 border border-slate-600 rounded-lg p-2 text-white" placeholder="Your answer...">
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded">
+                            <p class="font-semibold mb-2">7. Do all vehicles have fixed routes? Explain your answer.</p>
+                            <input type="text" class="question-input w-full bg-slate-700 border border-slate-600 rounded-lg p-2 text-white" placeholder="Your answer...">
+                        </div>
+                        <div class="bg-slate-800 p-4 rounded">
+                            <p class="font-semibold mb-2">8. How many lorries have trailers? How many don't have trailers?</p>
+                            <input type="text" class="question-input w-full bg-slate-700 border border-slate-600 rounded-lg p-2 text-white" placeholder="Your answer...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task 3: Complete the Summary -->
+                <div class="bg-slate-900/50 rounded-lg p-6">
+                    <h4 class="font-semibold text-xl mb-4 text-blue-300">Task 3: Complete the Summary (Gap-fill)</h4>
+                    <div class="bg-slate-800 p-5 rounded-lg space-y-3 text-lg leading-relaxed">
+                        <p>
+                            QuickLogistics has <input type="text" class="question-input bg-slate-700 border border-slate-600 rounded px-2 py-1 w-16 text-white"> vans
+                            and <input type="text" class="question-input bg-slate-700 border border-slate-600 rounded px-2 py-1 w-16 text-white"> lorries.
+                            The company has <input type="text" class="question-input bg-slate-700 border border-slate-600 rounded px-2 py-1 w-20 text-white"> warehouses
+                            in London, Bristol, and Manchester.
+                            <input type="text" class="question-input bg-slate-700 border border-slate-600 rounded px-2 py-1 w-32 text-white"> manages the drivers,
+                            and <input type="text" class="question-input bg-slate-700 border border-slate-600 rounded px-2 py-1 w-32 text-white"> manages the warehouses.
+                            The company has <input type="text" class="question-input bg-slate-700 border border-slate-600 rounded px-2 py-1 w-16 text-white"> scanners,
+                            and the London warehouse has <input type="text" class="question-input bg-slate-700 border border-slate-600 rounded px-2 py-1 w-16 text-white"> forklifts.
+                            Maria manages the <input type="text" class="question-input bg-slate-700 border border-slate-600 rounded px-2 py-1 w-28 text-white">,
+                            and John manages the <input type="text" class="question-input bg-slate-700 border border-slate-600 rounded px-2 py-1 w-24 text-white">.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Task 4: Vocabulary Check -->
+                <div class="bg-slate-900/50 rounded-lg p-6">
+                    <h4 class="font-semibold text-xl mb-4 text-blue-300">Task 4: Vocabulary Check</h4>
+                    <p class="text-gray-300 mb-4">Find these words/phrases in the report and write what they mean:</p>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-slate-800 p-3 rounded">
+                            <p class="font-semibold mb-2">1. "strategic locations"</p>
+                            <input type="text" class="question-input w-full bg-slate-700 border border-slate-600 rounded p-2 text-white text-sm" placeholder="Your definition...">
+                        </div>
+                        <div class="bg-slate-800 p-3 rounded">
+                            <p class="font-semibold mb-2">2. "efficient operations"</p>
+                            <input type="text" class="question-input w-full bg-slate-700 border border-slate-600 rounded p-2 text-white text-sm" placeholder="Your definition...">
+                        </div>
+                        <div class="bg-slate-800 p-3 rounded">
+                            <p class="font-semibold mb-2">3. "dedicated city routes"</p>
+                            <input type="text" class="question-input w-full bg-slate-700 border border-slate-600 rounded p-2 text-white text-sm" placeholder="Your definition...">
+                        </div>
+                        <div class="bg-slate-800 p-3 rounded">
+                            <p class="font-semibold mb-2">4. "in real-time"</p>
+                            <input type="text" class="question-input w-full bg-slate-700 border border-slate-600 rounded p-2 text-white text-sm" placeholder="Your definition...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<script>
+// ============================================
+// STATE & DATA
+// ============================================
+let currentSlide = 25;
+let matchingPairs = {
+    sarah: 'drivers',
+    tom: 'warehouses',
+    maria: 'deliveries',
+    john: 'routes',
+    lisa: 'inventory'
+};
+let selectedManager = null;
+let selectedObject = null;
+
+// ============================================
+// NAVIGATION
+// ============================================
+function updateSlideDisplay() {
+    document.querySelectorAll('.slide').forEach(slide => {
+        slide.classList.remove('active');
+    });
+    document.getElementById(`slide-${currentSlide}`).classList.add('active');
+
+    document.querySelectorAll('.nav-dot').forEach(dot => {
+        dot.classList.remove('active');
+        if (parseInt(dot.dataset.slide) === currentSlide) {
+            dot.classList.add('active');
+        }
+    });
+
+    document.getElementById('prev-btn').disabled = currentSlide === 25;
+    document.getElementById('next-btn').disabled = currentSlide === 32;
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('prev-btn').addEventListener('click', () => {
+    if (currentSlide > 25) {
+        currentSlide--;
+        updateSlideDisplay();
+    }
+});
+
+document.getElementById('next-btn').addEventListener('click', () => {
+    if (currentSlide < 32) {
+        currentSlide++;
+        updateSlideDisplay();
+    }
+});
+
+document.querySelectorAll('.nav-dot').forEach(dot => {
+    dot.addEventListener('click', () => {
+        currentSlide = parseInt(dot.dataset.slide);
+        updateSlideDisplay();
+    });
+});
+
+// ============================================
+// SLIDE 27: MATCHING EXERCISE
+// ============================================
+document.querySelectorAll('#managers-list .vocab-card').forEach(card => {
+    card.addEventListener('click', () => {
+        document.querySelectorAll('#managers-list .vocab-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        selectedManager = card.dataset.id;
+        checkMatch();
+    });
+});
+
+document.querySelectorAll('#objects-list .vocab-card').forEach(card => {
+    card.addEventListener('click', () => {
+        document.querySelectorAll('#objects-list .vocab-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        selectedObject = card.dataset.id;
+        checkMatch();
+    });
+});
+
+function checkMatch() {
+    if (selectedManager && selectedObject) {
+        const managerCard = document.querySelector(`#managers-list .vocab-card[data-id="${selectedManager}"]`);
+        const objectCard = document.querySelector(`#objects-list .vocab-card[data-id="${selectedObject}"]`);
+
+        if (matchingPairs[selectedManager] === selectedObject) {
+            managerCard.classList.add('correct');
+            objectCard.classList.add('correct');
+            managerCard.style.pointerEvents = 'none';
+            objectCard.style.pointerEvents = 'none';
+        } else {
+            managerCard.classList.add('incorrect');
+            objectCard.classList.add('incorrect');
+            setTimeout(() => {
+                managerCard.classList.remove('incorrect');
+                objectCard.classList.remove('incorrect');
+            }, 1000);
+        }
+
+        managerCard.classList.remove('selected');
+        objectCard.classList.remove('selected');
+        selectedManager = null;
+        selectedObject = null;
+    }
+}
+
+document.getElementById('check-match-btn').addEventListener('click', () => {
+    let correct = 0;
+    document.querySelectorAll('#managers-list .vocab-card.correct').forEach(() => correct++);
+    document.getElementById('match-score').classList.remove('hidden');
+    document.getElementById('match-score-value').textContent = `${correct}/5`;
+});
+
+document.getElementById('reset-match-btn').addEventListener('click', () => {
+    document.querySelectorAll('.vocab-card').forEach(card => {
+        card.classList.remove('correct', 'incorrect', 'selected');
+        card.style.pointerEvents = 'auto';
+    });
+    selectedManager = null;
+    selectedObject = null;
+    document.getElementById('match-score').classList.add('hidden');
+});
+
+// ============================================
+// SLIDE 28: GRAMMAR EXERCISE
+// ============================================
+document.getElementById('check-grammar-btn').addEventListener('click', () => {
+    document.querySelectorAll('#grammar-exercises .question-input').forEach(input => {
+        const userAnswer = input.value.trim().toLowerCase();
+        const correctAnswer = input.dataset.answer.toLowerCase();
+
+        if (userAnswer === correctAnswer) {
+            input.classList.add('correct');
+            input.classList.remove('incorrect');
+        } else {
+            input.classList.add('incorrect');
+            input.classList.remove('correct');
+        }
+    });
+});
+
+// ============================================
+// AUDIO PLACEHOLDER
+// ============================================
+document.getElementById('play-dialogue-btn').addEventListener('click', () => {
+    alert('Audio playback would be implemented here.\n\nIn the full version, this would play the generated TTS dialogue between Sarah and Tom.');
+});
+
+// ============================================
+// INITIALIZE
+// ============================================
+updateSlideDisplay();
+</script>
+
+</body>
+</html>
