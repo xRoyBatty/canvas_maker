@@ -1,36 +1,50 @@
 /**
  * Canvas Library - Abstraction layer for Gemini Canvas apps
  * Handles Firebase, Gemini API, Firestore, asset management, and common utilities
- * @version 1.0.0
+ * @version 2.0.0
+ *
+ * NEW IN V2:
+ * - Auto-chunking in Firestore (no more separate save/saveAsset methods!)
+ * - app.ready promise pattern (cleaner initialization)
+ * - Real-time subscriptions with subscribe()
+ * - Optimizer class (PNG→JPG, PCM→MP3 compression)
+ * - Simplified multi-speaker TTS syntax
+ * - Copy to clipboard helper
+ * - Auto viewport meta tag fix
  */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // ============================================
-// CONFIGURATION & STATE
+// 1. CORE APP & AUTH
 // ============================================
 class CanvasApp {
     constructor(appId) {
-        this.appId = appId || 'canvas-app-default';
+        this.appId = appId || (typeof __app_id !== 'undefined' ? __app_id : 'canvas-app-default');
         this.app = null;
         this.db = null;
         this.auth = null;
         this.userId = null;
-        this.initialized = false;
+
+        // NEW: The ready promise allows "await app.ready"
+        this.ready = this._initialize();
     }
 
     /**
      * Initialize Firebase with Canvas environment variables
-     * @returns {Promise<Object>} - { app, db, auth, userId }
+     * @private
+     * @returns {Promise<CanvasApp>} - this
      */
-    async initialize() {
-        if (this.initialized) {
-            return { app: this.app, db: this.db, auth: this.auth, userId: this.userId };
-        }
-
+    async _initialize() {
         try {
+            // NEW: Auto-fix viewport if missing
+            if (!document.querySelector('meta[name="viewport"]')) {
+                document.head.insertAdjacentHTML('beforeend',
+                    '<meta name="viewport" content="width=device-width, initial-scale=1.0">');
+            }
+
             // Use Canvas-provided Firebase config
             const firebaseConfig = typeof __firebase_config !== 'undefined'
                 ? JSON.parse(__firebase_config)
@@ -58,8 +72,7 @@ class CanvasApp {
                 });
             });
 
-            this.initialized = true;
-            return { app: this.app, db: this.db, auth: this.auth, userId: this.userId };
+            return this;
         } catch (error) {
             throw new Error(`Canvas initialization failed: ${error.message}`);
         }
@@ -71,7 +84,7 @@ class CanvasApp {
 }
 
 // ============================================
-// API CLIENT - Gemini Models
+// 2. AI CLIENT - Gemini Models
 // ============================================
 class GeminiAPI {
     constructor() {
@@ -313,33 +326,40 @@ class GeminiAPI {
 
     /**
      * Generate speech with TTS
-     * @param {string} text - Text to speak (can include speaker names for multi-speaker)
-     * @param {Object} options - { voice, multiSpeaker: [{speaker, voice}], sampleRate }
+     * NEW: Simplified multi-speaker syntax - pass array [{name, voice}]
+     * @param {string} text - Text to speak
+     * @param {Object} options - { voice: 'Kore' } OR { speakers: [{name, voice}] }
      * @returns {Promise<string>} - Base64-encoded PCM audio
      */
     async generateSpeech(text, options = {}) {
-        const {
-            voice = 'Kore',
-            multiSpeaker = null,
-            sampleRate = 24000
-        } = options;
+        const { voice = 'Kore', speakers = null } = options;
 
         return this._callWithRetry(async () => {
             const url = `${this.baseUrl}/gemini-2.5-flash-preview-tts:generateContent?key=${this.apiKey}`;
+
+            let speechConfig;
+
+            // NEW: Simplified multi-speaker handling
+            if (speakers && Array.isArray(speakers)) {
+                speechConfig = {
+                    multiSpeakerVoiceConfig: {
+                        speakerVoiceConfigs: speakers.map(s => ({
+                            speaker: s.name,
+                            voiceConfig: { prebuiltVoiceConfig: { voiceName: s.voice } }
+                        }))
+                    }
+                };
+            } else {
+                speechConfig = {
+                    voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } }
+                };
+            }
 
             const payload = {
                 contents: [{ parts: [{ text }] }],
                 generationConfig: {
                     responseModalities: ["AUDIO"],
-                    speechConfig: multiSpeaker ? {
-                        multiSpeakerVoiceConfig: {
-                            speakerVoiceConfigs: multiSpeaker
-                        }
-                    } : {
-                        voiceConfig: {
-                            prebuiltVoiceConfig: { voiceName: voice }
-                        }
-                    }
+                    speechConfig
                 }
             };
 
@@ -362,12 +382,12 @@ class GeminiAPI {
 }
 
 // ============================================
-// FIRESTORE MANAGER - With Chunking
+// 3. FIRESTORE MANAGER - With Auto-Chunking
 // ============================================
 class FirestoreManager {
     constructor(canvasApp) {
         this.canvasApp = canvasApp;
-        this.MAX_CHUNK_SIZE = 950 * 1024; // ~950KB per chunk (1MB limit with overhead)
+        this.CHUNK_THRESHOLD = 800 * 1024; // NEW: 800KB threshold for auto-chunking
     }
 
     /**
@@ -387,35 +407,58 @@ class FirestoreManager {
     }
 
     /**
-     * Save data (auto-chunks if >950KB)
+     * NEW: Intelligent Save - Auto-detects size and chunks if necessary
      * @param {string} docName - Document name
-     * @param {Object} data - Data to save
+     * @param {Object|string} data - Data to save (any JSON-serializable data OR base64 string for assets)
      * @param {boolean} isPublic - Save to public path
+     * @param {string} mimeType - Optional: if saving base64 asset, specify MIME type
      * @returns {Promise<void>}
      */
-    async save(docName, data, isPublic = false) {
-        if (!this.canvasApp.initialized) {
-            throw new Error('CanvasApp not initialized. Call app.initialize() first.');
+    async save(docName, data, isPublic = false, mimeType = null) {
+        // Wait for app to be ready
+        await this.canvasApp.ready;
+
+        // Handle base64 asset vs regular data
+        const isAsset = mimeType !== null;
+        const dataStr = isAsset ? data : JSON.stringify(data);
+
+        // Auto-chunking if data is large
+        if (dataStr.length > this.CHUNK_THRESHOLD) {
+            return this._saveChunked(docName, dataStr, isPublic, isAsset, mimeType);
         }
 
+        // Regular save for small data
         const pathSegments = isPublic
             ? this._getPublicPath(docName)
             : this._getPrivatePath(docName);
 
         const docRef = doc(this.canvasApp.db, ...pathSegments);
-        await setDoc(docRef, data);
+
+        if (isAsset) {
+            await setDoc(docRef, {
+                _isAsset: true,
+                _isChunked: false,
+                mimeType,
+                data: dataStr,
+                timestamp: Date.now()
+            });
+        } else {
+            await setDoc(docRef, {
+                _isChunked: false,
+                data,
+                timestamp: Date.now()
+            });
+        }
     }
 
     /**
-     * Load data
+     * Load data (transparently handles chunked data)
      * @param {string} docName - Document name
      * @param {boolean} isPublic - Load from public path
-     * @returns {Promise<Object|null>} - Loaded data or null
+     * @returns {Promise<Object|string|null>} - Loaded data, base64 string for assets, or null
      */
     async load(docName, isPublic = false) {
-        if (!this.canvasApp.initialized) {
-            throw new Error('CanvasApp not initialized. Call app.initialize() first.');
-        }
+        await this.canvasApp.ready;
 
         const pathSegments = isPublic
             ? this._getPublicPath(docName)
@@ -424,137 +467,219 @@ class FirestoreManager {
         const docRef = doc(this.canvasApp.db, ...pathSegments);
         const docSnap = await getDoc(docRef);
 
-        return docSnap.exists() ? docSnap.data() : null;
-    }
+        if (!docSnap.exists()) return null;
 
-    /**
-     * Save large data with chunking (for images, audio, etc.)
-     * @param {string} assetName - Asset identifier
-     * @param {string} mimeType - MIME type
-     * @param {string} base64Data - Base64-encoded data
-     * @param {boolean} isPublic - Save to public path
-     * @returns {Promise<void>}
-     */
-    async saveAsset(assetName, mimeType, base64Data, isPublic = false) {
-        if (!this.canvasApp.initialized) {
-            throw new Error('CanvasApp not initialized. Call app.initialize() first.');
-        }
+        const docData = docSnap.data();
 
-        // Split into chunks
-        const chunks = [];
-        for (let i = 0; i < base64Data.length; i += this.MAX_CHUNK_SIZE) {
-            chunks.push(base64Data.substring(i, i + this.MAX_CHUNK_SIZE));
-        }
+        // Handle chunked data transparently
+        if (docData._isChunked) {
+            const reassembled = await this._loadChunked(docName, docData, isPublic);
 
-        const pathSegments = isPublic
-            ? this._getPublicPath(assetName)
-            : this._getPrivatePath(assetName);
-
-        // Save metadata
-        const metaRef = doc(this.canvasApp.db, ...pathSegments);
-        await setDoc(metaRef, {
-            mimeType,
-            chunkCount: chunks.length,
-            createdAt: new Date(),
-            size: base64Data.length
-        });
-
-        // Save chunks in parallel
-        const chunkPromises = chunks.map((chunkData, index) => {
-            const chunkRef = doc(this.canvasApp.db, ...pathSegments, 'chunks', String(index));
-            return setDoc(chunkRef, { data: chunkData });
-        });
-
-        await Promise.all(chunkPromises);
-    }
-
-    /**
-     * Load large data with chunking
-     * @param {string} assetName - Asset identifier
-     * @param {boolean} isPublic - Load from public path
-     * @returns {Promise<Object|null>} - { base64Data, mimeType } or null
-     */
-    async loadAsset(assetName, isPublic = false) {
-        if (!this.canvasApp.initialized) {
-            throw new Error('CanvasApp not initialized. Call app.initialize() first.');
-        }
-
-        const pathSegments = isPublic
-            ? this._getPublicPath(assetName)
-            : this._getPrivatePath(assetName);
-
-        // Load metadata
-        const metaRef = doc(this.canvasApp.db, ...pathSegments);
-        const metaSnap = await getDoc(metaRef);
-
-        if (!metaSnap.exists()) return null;
-
-        const { mimeType, chunkCount } = metaSnap.data();
-
-        // Load chunks in parallel
-        const chunkPromises = [];
-        for (let i = 0; i < chunkCount; i++) {
-            const chunkRef = doc(this.canvasApp.db, ...pathSegments, 'chunks', String(i));
-            chunkPromises.push(getDoc(chunkRef));
-        }
-
-        const chunkDocs = await Promise.all(chunkPromises);
-
-        // Reassemble data
-        let base64Data = '';
-        for (const chunkDoc of chunkDocs) {
-            if (chunkDoc.exists()) {
-                base64Data += chunkDoc.data().data;
+            // Return base64 for assets, parsed JSON for regular data
+            if (docData._isAsset) {
+                return { base64Data: reassembled, mimeType: docData.mimeType };
             } else {
-                return null; // Missing chunk
+                return JSON.parse(reassembled);
             }
         }
 
-        return { base64Data, mimeType };
+        // Return data directly for non-chunked
+        if (docData._isAsset) {
+            return { base64Data: docData.data, mimeType: docData.mimeType };
+        } else {
+            return docData.data;
+        }
     }
 
     /**
-     * Delete data or asset
-     * @param {string} docName - Document/asset name
+     * NEW: Subscribe to real-time updates
+     * @param {string} docName - Document name
+     * @param {Function} onData - Callback(data)
+     * @param {boolean} isPublic - Subscribe to public path
+     * @returns {Function} - Unsubscribe function
+     */
+    subscribe(docName, onData, isPublic = false) {
+        const pathSegments = isPublic
+            ? this._getPublicPath(docName)
+            : this._getPrivatePath(docName);
+
+        const docRef = doc(this.canvasApp.db, ...pathSegments);
+
+        return onSnapshot(docRef, async (snap) => {
+            if (!snap.exists()) return onData(null);
+
+            const docData = snap.data();
+
+            // Note: Real-time chunk re-assembly can be heavy
+            // For chunked data, just notify that update is available
+            if (docData._isChunked) {
+                onData({ _needsReload: true, timestamp: docData.timestamp });
+            } else {
+                onData(docData._isAsset ? { base64Data: docData.data, mimeType: docData.mimeType } : docData.data);
+            }
+        });
+    }
+
+    /**
+     * Delete data or asset (handles chunked data automatically)
+     * @param {string} docName - Document name
      * @param {boolean} isPublic - Delete from public path
-     * @param {boolean} isAsset - Whether this is a chunked asset
      * @returns {Promise<void>}
      */
-    async delete(docName, isPublic = false, isAsset = false) {
-        if (!this.canvasApp.initialized) {
-            throw new Error('CanvasApp not initialized. Call app.initialize() first.');
+    async delete(docName, isPublic = false) {
+        await this.canvasApp.ready;
+
+        const pathSegments = isPublic
+            ? this._getPublicPath(docName)
+            : this._getPrivatePath(docName);
+
+        const docRef = doc(this.canvasApp.db, ...pathSegments);
+        const docSnap = await getDoc(docRef);
+
+        if (!docSnap.exists()) return;
+
+        const docData = docSnap.data();
+
+        // Delete chunks if necessary
+        if (docData._isChunked) {
+            const deletePromises = [];
+            for (let i = 0; i < docData.totalChunks; i++) {
+                const chunkPath = [...pathSegments.slice(0, -1), `${docName}_chunk_${i}`];
+                const chunkRef = doc(this.canvasApp.db, ...chunkPath);
+                deletePromises.push(deleteDoc(chunkRef));
+            }
+            await Promise.all(deletePromises);
+        }
+
+        // Delete main document
+        await deleteDoc(docRef);
+    }
+
+    // --- Internal Chunking Methods ---
+    async _saveChunked(docName, dataStr, isPublic, isAsset, mimeType) {
+        const chunks = [];
+        for (let i = 0; i < dataStr.length; i += this.CHUNK_THRESHOLD) {
+            chunks.push(dataStr.substring(i, i + this.CHUNK_THRESHOLD));
         }
 
         const pathSegments = isPublic
             ? this._getPublicPath(docName)
             : this._getPrivatePath(docName);
 
-        if (isAsset) {
-            // Delete all chunks first
-            const metaRef = doc(this.canvasApp.db, ...pathSegments);
-            const metaSnap = await getDoc(metaRef);
+        // Save metadata
+        const docRef = doc(this.canvasApp.db, ...pathSegments);
+        await setDoc(docRef, {
+            _isChunked: true,
+            _isAsset: isAsset,
+            mimeType: isAsset ? mimeType : null,
+            totalChunks: chunks.length,
+            timestamp: Date.now()
+        });
 
-            if (metaSnap.exists()) {
-                const { chunkCount } = metaSnap.data();
-                const deletePromises = [];
+        // Save chunks in parallel
+        const chunkPromises = chunks.map((chunk, i) => {
+            const chunkPath = [...pathSegments.slice(0, -1), `${docName}_chunk_${i}`];
+            const chunkRef = doc(this.canvasApp.db, ...chunkPath);
+            return setDoc(chunkRef, { data: chunk });
+        });
 
-                for (let i = 0; i < chunkCount; i++) {
-                    const chunkRef = doc(this.canvasApp.db, ...pathSegments, 'chunks', String(i));
-                    deletePromises.push(deleteDoc(chunkRef));
-                }
+        await Promise.all(chunkPromises);
+    }
 
-                await Promise.all(deletePromises);
-            }
+    async _loadChunked(docName, meta, isPublic) {
+        const pathSegments = isPublic
+            ? this._getPublicPath(docName)
+            : this._getPrivatePath(docName);
+
+        const chunkPromises = [];
+        for (let i = 0; i < meta.totalChunks; i++) {
+            const chunkPath = [...pathSegments.slice(0, -1), `${docName}_chunk_${i}`];
+            const chunkRef = doc(this.canvasApp.db, ...chunkPath);
+            chunkPromises.push(getDoc(chunkRef));
         }
 
-        // Delete main document
-        const docRef = doc(this.canvasApp.db, ...pathSegments);
-        await deleteDoc(docRef);
+        const chunkDocs = await Promise.all(chunkPromises);
+
+        if (chunkDocs.some(s => !s.exists())) {
+            throw new Error('Corrupted chunked data - missing chunks');
+        }
+
+        return chunkDocs.map(s => s.data().data).join('');
     }
 }
 
 // ============================================
-// ASSET MANAGER - Cache & Load with Retry
+// 4. OPTIMIZER - Client-Side Compression
+// ============================================
+class Optimizer {
+    /**
+     * Compress PNG to JPG (saves ~90% space)
+     * @param {string} base64Png - Base64-encoded PNG
+     * @param {number} quality - JPG quality 0-1 (default 0.6)
+     * @returns {Promise<string>} - Base64-encoded JPG
+     */
+    static async compressImage(base64Png, quality = 0.6) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#FFF'; // JPG needs white background
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+
+                resolve(canvas.toDataURL('image/jpeg', quality).split(',')[1]);
+            };
+            img.src = `data:image/png;base64,${base64Png}`;
+        });
+    }
+
+    /**
+     * Note: MP3 compression requires external library (lamejs)
+     * Include: <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
+     *
+     * Compress PCM to MP3 (saves ~80% space)
+     * @param {string} base64Pcm - Base64-encoded PCM
+     * @returns {Promise<string>} - Base64-encoded MP3
+     */
+    static async compressAudio(base64Pcm) {
+        if (typeof lamejs === 'undefined') {
+            console.warn("Optimizer: lamejs library not found. Install via: <script src='https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js'></script>");
+            return base64Pcm;
+        }
+
+        return new Promise((resolve) => {
+            const binaryString = atob(base64Pcm);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+
+            const pcm16 = new Int16Array(bytes.buffer);
+            const encoder = new lamejs.Mp3Encoder(1, 24000, 128); // Mono, 24kHz, 128kbps
+            const chunks = [];
+            const blockSize = 1152;
+
+            for (let i = 0; i < pcm16.length; i += blockSize) {
+                const buffer = encoder.encodeBuffer(pcm16.subarray(i, i + blockSize));
+                if (buffer.length > 0) chunks.push(buffer);
+            }
+
+            const endBuffer = encoder.flush();
+            if (endBuffer.length > 0) chunks.push(endBuffer);
+
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result.split(',')[1]);
+            reader.readAsDataURL(new Blob(chunks, { type: 'audio/mp3' }));
+        });
+    }
+}
+
+// ============================================
+// 5. ASSET MANAGER - Smart Caching
 // ============================================
 class AssetManager {
     constructor(canvasApp, firestoreManager, geminiAPI) {
@@ -568,14 +693,15 @@ class AssetManager {
      * Get or generate image asset
      * @param {string} assetId - Unique identifier
      * @param {string} prompt - Image generation prompt
-     * @param {Object} options - { aspectRatio, forceRegenerate, isPublic }
+     * @param {Object} options - { aspectRatio, forceRegenerate, isPublic, compress }
      * @returns {Promise<string>} - Data URL (data:image/png;base64,...)
      */
     async getImage(assetId, prompt, options = {}) {
         const {
             aspectRatio = '16:9',
             forceRegenerate = false,
-            isPublic = false
+            isPublic = false,
+            compress = false // NEW: Auto-compress to JPG
         } = options;
 
         // Check memory cache
@@ -585,7 +711,7 @@ class AssetManager {
 
         // Check Firestore cache
         if (!forceRegenerate) {
-            const cached = await this.firestore.loadAsset(assetId, isPublic);
+            const cached = await this.firestore.load(assetId, isPublic);
             if (cached) {
                 const dataUrl = `data:${cached.mimeType};base64,${cached.base64Data}`;
                 this.cache.set(assetId, dataUrl);
@@ -594,10 +720,18 @@ class AssetManager {
         }
 
         // Generate new image
-        const base64 = await this.gemini.generateImage(prompt, { aspectRatio });
-        await this.firestore.saveAsset(assetId, 'image/png', base64, isPublic);
+        let base64 = await this.gemini.generateImage(prompt, { aspectRatio });
+        let mimeType = 'image/png';
 
-        const dataUrl = `data:image/png;base64,${base64}`;
+        // NEW: Optional compression
+        if (compress) {
+            base64 = await Optimizer.compressImage(base64, 0.6);
+            mimeType = 'image/jpeg';
+        }
+
+        await this.firestore.save(assetId, base64, isPublic, mimeType);
+
+        const dataUrl = `data:${mimeType};base64,${base64}`;
         this.cache.set(assetId, dataUrl);
         return dataUrl;
     }
@@ -606,13 +740,13 @@ class AssetManager {
      * Get or generate audio asset
      * @param {string} assetId - Unique identifier
      * @param {string} text - Text to speak
-     * @param {Object} options - { voice, multiSpeaker, forceRegenerate, isPublic }
+     * @param {Object} options - { voice, speakers: [{name, voice}], forceRegenerate, isPublic }
      * @returns {Promise<string>} - Blob URL
      */
     async getAudio(assetId, text, options = {}) {
         const {
             voice = 'Kore',
-            multiSpeaker = null,
+            speakers = null, // NEW: Simplified syntax
             forceRegenerate = false,
             isPublic = false
         } = options;
@@ -624,7 +758,7 @@ class AssetManager {
 
         // Check Firestore cache
         if (!forceRegenerate) {
-            const cached = await this.firestore.loadAsset(assetId, isPublic);
+            const cached = await this.firestore.load(assetId, isPublic);
             if (cached) {
                 const sampleRate = parseInt(cached.mimeType.match(/rate=(\d+)/)?.[1] || '24000', 10);
                 const pcmArray = new Int16Array(this._base64ToArrayBuffer(cached.base64Data));
@@ -636,8 +770,8 @@ class AssetManager {
         }
 
         // Generate new audio
-        const base64 = await this.gemini.generateSpeech(text, { voice, multiSpeaker });
-        await this.firestore.saveAsset(assetId, 'audio/pcm;rate=24000', base64, isPublic);
+        const base64 = await this.gemini.generateSpeech(text, { voice, speakers });
+        await this.firestore.save(assetId, base64, isPublic, 'audio/pcm;rate=24000');
 
         const pcmArray = new Int16Array(this._base64ToArrayBuffer(base64));
         const wavBlob = this._pcmToWav(pcmArray, 24000);
@@ -730,7 +864,7 @@ class AssetManager {
 }
 
 // ============================================
-// UI HELPERS
+// 6. UI HELPERS
 // ============================================
 class UIHelpers {
     /**
@@ -811,7 +945,7 @@ class UIHelpers {
     /**
      * Create progress bar
      * @param {string} id - Progress bar ID
-     * @returns {Object} - { element, update(current, total) }
+     * @returns {Object} - { element, update(current, total), setMessage(msg) }
      */
     static createProgressBar(id) {
         const container = document.createElement('div');
@@ -830,7 +964,6 @@ class UIHelpers {
                 bar.style.width = `${percentage}%`;
             },
             setMessage(message) {
-                // Add a text element if needed
                 let textEl = container.querySelector('.progress-text');
                 if (!textEl) {
                     textEl = document.createElement('p');
@@ -840,6 +973,28 @@ class UIHelpers {
                 textEl.textContent = message;
             }
         };
+    }
+
+    /**
+     * NEW: Copy to clipboard with fallback for older browsers
+     * @param {string} text - Text to copy
+     */
+    static copyToClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text);
+            this.showToast('Copied to clipboard!', 'success', 2000);
+        } else {
+            // Fallback for older browsers
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            this.showToast('Copied to clipboard!', 'success', 2000);
+        }
     }
 }
 
@@ -851,22 +1006,24 @@ export {
     GeminiAPI,
     FirestoreManager,
     AssetManager,
-    UIHelpers
+    UIHelpers,
+    Optimizer
 };
 
 /**
  * Quick start helper
- * @param {string} appId - Your app identifier
- * @returns {Promise<Object>} - { app, gemini, firestore, assets, ui }
+ * @param {string} appId - Your app identifier (optional, auto-detects __app_id)
+ * @returns {Promise<Object>} - { app, gemini, firestore, assets, ui, optimizer }
  */
 export async function initCanvas(appId) {
     const app = new CanvasApp(appId);
-    await app.initialize();
+    await app.ready; // NEW: Use ready promise instead of initialize()
 
     const gemini = new GeminiAPI();
     const firestore = new FirestoreManager(app);
     const assets = new AssetManager(app, firestore, gemini);
     const ui = UIHelpers;
+    const optimizer = Optimizer;
 
-    return { app, gemini, firestore, assets, ui };
+    return { app, gemini, firestore, assets, ui, optimizer };
 }
